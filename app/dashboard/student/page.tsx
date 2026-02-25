@@ -235,6 +235,36 @@ export default function StudentDashboard() {
           </div>
         </div>
       </Card>
+
+      {/* Additional Actions */}
+      <Card className="p-6 border border-gray-200 rounded-2xl">
+        <h2 className="text-xl font-bold text-gray-900 mb-6">Quick Actions</h2>
+        <div className="grid md:grid-cols-3 gap-4">
+          <button className="p-4 rounded-lg bg-[#27AE60]/10 hover:bg-[#27AE60]/20 transition-colors text-left border border-[#27AE60]/20">
+            <div className="w-10 h-10 rounded-lg bg-[#27AE60]/20 flex items-center justify-center mb-2">
+              <Clock className="w-5 h-5 text-[#27AE60]" />
+            </div>
+            <p className="font-medium text-gray-900">Export Timetable</p>
+            <p className="text-xs text-gray-600">Download your schedule</p>
+          </button>
+
+          <button className="p-4 rounded-lg bg-[#F39C12]/10 hover:bg-[#F39C12]/20 transition-colors text-left border border-[#F39C12]/20">
+            <div className="w-10 h-10 rounded-lg bg-[#F39C12]/20 flex items-center justify-center mb-2">
+              <Award className="w-5 h-5 text-[#F39C12]" />
+            </div>
+            <p className="font-medium text-gray-900">View Results</p>
+            <p className="text-xs text-gray-600">Check your grades</p>
+          </button>
+
+          <button className="p-4 rounded-lg bg-[#E83E8C]/10 hover:bg-[#E83E8C]/20 transition-colors text-left border border-[#E83E8C]/20">
+            <div className="w-10 h-10 rounded-lg bg-[#E83E8C]/20 flex items-center justify-center mb-2">
+              <Users className="w-5 h-5 text-[#E83E8C]" />
+            </div>
+            <p className="font-medium text-gray-900">My Profile</p>
+            <p className="text-xs text-gray-600">Update your info</p>
+          </button>
+        </div>
+      </Card>
     </div>
   );
 }

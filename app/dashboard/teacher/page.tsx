@@ -3,10 +3,14 @@
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { Clock, Users, BookOpen, AlertCircle } from 'lucide-react';
+import { Clock, Users, BookOpen, AlertCircle, Mail, CheckCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { useState } from 'react';
 
 export default function TeacherDashboard() {
+  const [showMarkAbsentModal, setShowMarkAbsentModal] = useState(false);
+  const [emailNotifications, setEmailNotifications] = useState(true);
+
   const todaysClasses = [
     {
       id: 1,
@@ -183,6 +187,136 @@ export default function TeacherDashboard() {
           </Card>
         </div>
       </div>
+
+      {/* Teacher Actions */}
+      <div className="grid md:grid-cols-3 gap-6">
+        {/* Mark Absent Button */}
+        <Card className="p-6 border border-gray-200 rounded-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-900">Absence Management</h3>
+            <AlertCircle className="w-5 h-5 text-[#E74C3C]" />
+          </div>
+          <p className="text-sm text-gray-600 mb-4">
+            Mark yourself as absent and notify all students
+          </p>
+          <Button
+            onClick={() => setShowMarkAbsentModal(true)}
+            className="w-full bg-[#E74C3C] hover:bg-red-700 text-white"
+          >
+            Mark Absent Today
+          </Button>
+        </Card>
+
+        {/* Email Notifications */}
+        <Card className="p-6 border border-gray-200 rounded-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-900">Email Notifications</h3>
+            <Mail className="w-5 h-5 text-[#27AE60]" />
+          </div>
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-gray-700">Enabled</span>
+              <button
+                onClick={() => setEmailNotifications(!emailNotifications)}
+                className={`relative w-11 h-6 rounded-full transition-colors ${
+                  emailNotifications ? 'bg-[#27AE60]' : 'bg-gray-300'
+                }`}
+              >
+                <div
+                  className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
+                    emailNotifications ? 'translate-x-5' : ''
+                  }`}
+                ></div>
+              </button>
+            </div>
+            <p className="text-xs text-gray-600">
+              {emailNotifications
+                ? 'You will receive notifications'
+                : 'Notifications are disabled'}
+            </p>
+          </div>
+        </Card>
+
+        {/* Absence History */}
+        <Card className="p-6 border border-gray-200 rounded-2xl">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-bold text-gray-900">Absence History</h3>
+            <CheckCircle className="w-5 h-5 text-[#F39C12]" />
+          </div>
+          <p className="text-sm text-gray-600 mb-4">
+            View your absence records and email logs
+          </p>
+          <Link href="/dashboard/teacher/absences" className="w-full block">
+            <Button variant="outline" className="w-full">
+              View History
+            </Button>
+          </Link>
+        </Card>
+      </div>
+
+      {/* Mark Absent Modal */}
+      {showMarkAbsentModal && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-8 max-w-md w-full space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold text-gray-900">Mark Yourself Absent</h2>
+              <p className="text-gray-600 text-sm mt-1">
+                Notify all your students about your absence
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="form-label">Date</label>
+                <input
+                  type="date"
+                  className="form-input"
+                  defaultValue={new Date().toISOString().split('T')[0]}
+                />
+              </div>
+
+              <div>
+                <label className="form-label">Periods Affected</label>
+                <div className="space-y-2">
+                  {['Period 1', 'Period 2', 'Period 3', 'Period 4', 'Period 5'].map((period) => (
+                    <label key={period} className="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" className="w-4 h-4 rounded" />
+                      <span className="text-sm text-gray-700">{period}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="form-label">Reason (Optional)</label>
+                <textarea
+                  placeholder="Add a reason for your absence..."
+                  className="form-input h-24 resize-none"
+                ></textarea>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <Button
+                variant="outline"
+                onClick={() => setShowMarkAbsentModal(false)}
+                className="flex-1"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setShowMarkAbsentModal(false);
+                  // Show success message (in real app, would send to backend)
+                }}
+                className="flex-1 bg-[#E74C3C] hover:bg-red-700 text-white"
+              >
+                Send Notification
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Announcements */}
       <Card className="p-6 border border-gray-200">

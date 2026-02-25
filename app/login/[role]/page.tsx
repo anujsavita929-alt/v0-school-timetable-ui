@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Clock, Eye, EyeOff } from 'lucide-react';
+import { Clock, Eye, EyeOff, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -15,7 +15,18 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberMe, setRememberMe] = useState(false);
+  const [selectedOrg, setSelectedOrg] = useState('Springfield High School');
+  const [showOrgDropdown, setShowOrgDropdown] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Mock organizations data
+  const organizations = [
+    'Springfield High School',
+    'Lincoln Academy',
+    'Washington Institute',
+    'Jefferson College',
+  ];
 
   const getRoleDisplay = () => {
     return role.charAt(0).toUpperCase() + role.slice(1);
@@ -69,6 +80,40 @@ export default function LoginPage() {
 
           {/* Form */}
           <form onSubmit={handleLogin} className="p-8 space-y-6">
+            {/* Organization Selector */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-900">
+                Organization
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setShowOrgDropdown(!showOrgDropdown)}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-left flex items-center justify-between hover:bg-gray-50 focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent outline-none"
+                >
+                  <span className="text-gray-900">{selectedOrg}</span>
+                  <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${showOrgDropdown ? 'rotate-180' : ''}`} />
+                </button>
+                {showOrgDropdown && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-lg z-10">
+                    {organizations.map((org) => (
+                      <button
+                        key={org}
+                        type="button"
+                        onClick={() => {
+                          setSelectedOrg(org);
+                          setShowOrgDropdown(false);
+                        }}
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 first:rounded-t-lg last:rounded-b-lg text-gray-900"
+                      >
+                        {org}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* Email */}
             <div className="space-y-2">
               <label className="block text-sm font-medium text-gray-900">
@@ -115,6 +160,20 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
+            </div>
+
+            {/* Remember Me */}
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="rememberMe"
+                checked={rememberMe}
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="w-4 h-4 rounded border-gray-300 text-[#E74C3C] focus:ring-[#E74C3C] cursor-pointer"
+              />
+              <label htmlFor="rememberMe" className="text-sm text-gray-700 cursor-pointer">
+                Remember me
+              </label>
             </div>
 
             {/* Submit */}

@@ -193,6 +193,53 @@ export default function PrincipalDashboard() {
         </div>
       </div>
 
+      {/* Organization & Administration */}
+      <div className="grid md:grid-cols-2 gap-6">
+        {/* Organization Creation */}
+        <Card className="p-6 border border-gray-200 rounded-2xl">
+          <h3 className="text-lg font-bold text-gray-900 mb-3">Organization Management</h3>
+          <p className="text-sm text-gray-600 mb-4">
+            Create or manage your school organization
+          </p>
+          <div className="space-y-3">
+            <Link href="/organizations" className="block">
+              <Button variant="outline" className="w-full justify-center">
+                Create Organization
+              </Button>
+            </Link>
+            <Link href="/organizations/manage" className="block">
+              <Button variant="outline" className="w-full justify-center">
+                Manage Organizations
+              </Button>
+            </Link>
+          </div>
+        </Card>
+
+        {/* Email Notification Logs */}
+        <Card className="p-6 border border-gray-200 rounded-2xl">
+          <h3 className="text-lg font-bold text-gray-900 mb-3">Email Notification Logs</h3>
+          <div className="space-y-3 mb-4">
+            <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+              <span className="text-sm text-gray-700">Total Sent</span>
+              <span className="font-semibold text-gray-900">324</span>
+            </div>
+            <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+              <span className="text-sm text-gray-700">Successful</span>
+              <span className="font-semibold text-[#27AE60]">318</span>
+            </div>
+            <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+              <span className="text-sm text-gray-700">Failed</span>
+              <span className="font-semibold text-[#E74C3C]">6</span>
+            </div>
+          </div>
+          <Link href="/dashboard/teacher/email-logs" className="block">
+            <Button variant="outline" className="w-full justify-center">
+              View Detailed Logs
+            </Button>
+          </Link>
+        </Card>
+      </div>
+
       {/* Recent Activity */}
       <Card className="p-6 border border-gray-200">
         <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Activity</h2>
