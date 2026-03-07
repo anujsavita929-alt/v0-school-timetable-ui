@@ -2,18 +2,19 @@
 import { PrismaClient } from '@prisma/client';
 
 const prismaClientSingleton = () => {
-  return new PrismaClient({
-    // If you later use Accelerate, switch to: accelerateUrl: process.env.DATABASE_URL
-    // For now → classic/direct connection (no extra param needed)
-  });
+  return new PrismaClient();
+  // If you get engine validation error later, try:
+  // return new PrismaClient({ __internal: { engineType: 'library' } });
 };
 
-declare const globalThis: {
-  prismaGlobal: ReturnType<typeof prismaClientSingleton>;
-} & typeof global;
+type PrismaSingleton = ReturnType<typeof prismaClientSingleton>;
 
-const prisma = globalThis.prismaGlobal ?? prismaClientSingleton();
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaSingleton | undefined;
+};
 
-if (process.env.NODE_ENV !== 'production') globalThis.prismaGlobal = prisma;
+const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
 
 export { prisma };
