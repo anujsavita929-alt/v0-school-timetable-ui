@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { User, Settings, LogOut, HelpCircle } from 'lucide-react';
 import Link from 'next/link';
+import { sessionStorage } from '@/lib/session';
+import { useRouter } from 'next/navigation';
 
 interface AvatarDropdownProps {
   userName?: string;
@@ -16,12 +18,13 @@ export function AvatarDropdown({
   userInitials = 'JD',
 }: AvatarDropdownProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
 
   const menuItems = [
     { label: 'Profile', icon: User, href: '#' },
     { label: 'Settings', icon: Settings, href: '#' },
     { label: 'Help', icon: HelpCircle, href: '#' },
-    { label: 'Logout', icon: LogOut, href: '#', color: '#E74C3C' },
+    { label: 'Logout', icon: LogOut, href: '#logout', color: '#E74C3C' },
   ];
 
   return (
@@ -58,7 +61,13 @@ export function AvatarDropdown({
                 return (
                   <Link key={item.label} href={item.href}>
                     <button
-                      onClick={() => setIsOpen(false)}
+                      onClick={() => {
+                        setIsOpen(false);
+                        if (item.href === '#logout') {
+                          sessionStorage.clear();
+                          router.push('/role-selection');
+                        }
+                      }}
                       className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left"
                       style={item.color ? { color: item.color } : undefined}
                     >

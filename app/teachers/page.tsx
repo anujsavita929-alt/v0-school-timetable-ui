@@ -13,10 +13,17 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Edit, Trash2, Download } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 export default function TeachersPage() {
-  const [searchTerm, setSearchTerm] = useState('');
+  const searchParams = useSearchParams();
+  const initialSearch = useMemo(
+    () => searchParams.get('q') ?? '',
+    [searchParams],
+  );
+
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [selectedSubject, setSelectedSubject] = useState('all');
 
   const teachers = [
@@ -112,7 +119,52 @@ export default function TeachersPage() {
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2">
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => {
+              if (!filteredTeachers.length) return;
+
+              const header = [
+                'Name',
+                'Teacher ID',
+                'Subject',
+                'Email',
+                'Phone',
+                'Classes',
+                'Status',
+              ];
+              const rows = filteredTeachers.map((teacher) => [
+                teacher.name,
+                teacher.teacherId,
+                teacher.subject,
+                teacher.email,
+                teacher.phone,
+                teacher.classes.join(' | '),
+                teacher.status,
+              ]);
+
+              const csvContent = [header, ...rows]
+                .map((cols) =>
+                  cols
+                    .map((value) => `"${String(value).replace(/"/g, '""')}"`)
+                    .join(','),
+                )
+                .join('\n');
+
+              const blob = new Blob([csvContent], {
+                type: 'text/csv;charset=utf-8;',
+              });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', 'teachers-export.csv');
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);
+            }}
+          >
             <Download className="w-4 h-4" />
             Export
           </Button>

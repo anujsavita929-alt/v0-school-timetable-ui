@@ -11,6 +11,9 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { sessionStorage } from '@/lib/session';
 
 interface NavbarProps {
   userName?: string;
@@ -18,32 +21,107 @@ interface NavbarProps {
   userInitials?: string;
 }
 
-export function Navbar({ 
+interface NotificationItem {
+  id: string;
+  title: string;
+  description: string;
+  time: string;
+}
+
+export function Navbar({
   userName = 'John Doe',
   userRole = 'Teacher',
-  userInitials = 'JD'
+  userInitials = 'JD',
 }: NavbarProps) {
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [hasUnread, setHasUnread] = useState(true);
+  const [notifications] = useState<NotificationItem[]>([
+    {
+      id: '1',
+      title: 'Timetable updated',
+      description: 'Class 10-A timetable has been updated.',
+      time: 'Just now',
+    },
+    {
+      id: '2',
+      title: 'New student added',
+      description: 'Arun Kumar has been added to class 10-A.',
+      time: '10 min ago',
+    },
+  ]);
+
+  const handleSearchSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    const query = searchQuery.trim();
+    if (!query) return;
+
+    // For now, route searches to the students page with a query parameter.
+    router.push(`/students?q=${encodeURIComponent(query)}`);
+  };
+
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-40">
       <div className="px-4 md:px-6 py-4 flex items-center justify-between gap-4">
         {/* Search Bar */}
         <div className="flex-1 max-w-md hidden md:block">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
-              placeholder="Search..."
-              className="pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-lg focus:bg-white"
-            />
-          </div>
+          <form onSubmit={handleSearchSubmit}>
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <Input
+                placeholder="Search students by name, ID, or email..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-lg focus:bg-white"
+              />
+            </div>
+          </form>
         </div>
 
         {/* Right Actions */}
         <div className="flex items-center gap-2 md:gap-4">
           {/* Notifications */}
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative">
-            <Bell className="w-5 h-5 text-gray-600" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-[#E74C3C] rounded-full"></span>
-          </button>
+          <DropdownMenu
+            onOpenChange={(open) => {
+              if (open) {
+                setHasUnread(false);
+              }
+            }}
+          >
+            <DropdownMenuTrigger asChild>
+              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors relative">
+                <Bell className="w-5 h-5 text-gray-600" />
+                {hasUnread && (
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-[#E74C3C] rounded-full" />
+                )}
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-80">
+              <div className="px-3 py-2 border-b border-gray-100">
+                <p className="text-sm font-semibold text-gray-900">Notifications</p>
+                <p className="text-xs text-gray-500">
+                  Recent timetable and student updates
+                </p>
+              </div>
+              {notifications.map((notification) => (
+                <DropdownMenuItem
+                  key={notification.id}
+                  className="flex flex-col items-start gap-1 py-2 cursor-default"
+                >
+                  <p className="text-xs font-medium text-gray-900">
+                    {notification.title}
+                  </p>
+                  <p className="text-xs text-gray-600">{notification.description}</p>
+                  <p className="text-[10px] text-gray-400">{notification.time}</p>
+                </DropdownMenuItem>
+              ))}
+              {notifications.length === 0 && (
+                <DropdownMenuItem className="text-xs text-gray-500 cursor-default">
+                  No notifications
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
           {/* User Menu */}
           <DropdownMenu>
@@ -77,7 +155,13 @@ export function Navbar({
                 Settings
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="cursor-pointer text-red-600">
+              <DropdownMenuItem
+                className="cursor-pointer text-red-600"
+                onClick={() => {
+                  sessionStorage.clear();
+                  router.push('/role-selection');
+                }}
+              >
                 <div className="w-4 h-4 mr-2" />
                 Logout
               </DropdownMenuItem>

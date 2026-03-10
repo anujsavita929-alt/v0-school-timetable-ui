@@ -11,48 +11,191 @@ import {
 } from '@/components/ui/select';
 import { TimetableGrid } from '@/components/timetable/TimetableGrid';
 import { Download, Printer } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+
+interface TimeSlot {
+  id: string;
+  day: string;
+  time: string;
+  subject: string;
+  teacher: string;
+  room: string;
+  color: string;
+}
+
+type WeekKey = 'current' | 'next' | 'previous';
 
 export default function TimetablePage() {
-  const [selectedClass, setSelectedClass] = useState('10-A');
-  const [selectedWeek, setSelectedWeek] = useState('current');
+  const [selectedClass, setSelectedClass] = useState<'10-A' | '10-B' | '9-A' | '9-B' | '8-A'>('10-A');
+  const [selectedWeek, setSelectedWeek] = useState<WeekKey>('current');
+  const [slots, setSlots] = useState<TimeSlot[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [editData, setEditData] = useState<{
+    id?: string;
+    day: string;
+    time: string;
+    subject: string;
+    teacher: string;
+    room: string;
+  } | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [subjectFilter, setSubjectFilter] = useState<string>('all');
+  const [teacherFilter, setTeacherFilter] = useState<string>('all');
+  const [dayFilter, setDayFilter] = useState<string>('all');
 
-  const timetableData = [
-    // Monday
-    { id: '1', day: 'Monday', time: '08:00 AM', subject: 'Mathematics', teacher: 'Mr. Smith', room: '101', color: 'red' },
-    { id: '2', day: 'Monday', time: '09:00 AM', subject: 'English', teacher: 'Ms. Johnson', room: '102', color: 'green' },
-    { id: '3', day: 'Monday', time: '10:00 AM', subject: 'Science', teacher: 'Dr. Brown', room: '103', color: 'orange' },
-    { id: '4', day: 'Monday', time: '11:00 AM', subject: 'History', teacher: 'Mr. Davis', room: '104', color: 'pink' },
-    { id: '5', day: 'Monday', time: '12:00 PM', subject: 'Physical Education', teacher: 'Mr. Wilson', room: 'Gym', color: 'red' },
+  const fetchTimetable = async (classId: string, week: WeekKey) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const params = new URLSearchParams({ classId, week });
+      const res = await fetch(`/api/timetable?${params.toString()}`);
+      if (!res.ok) {
+        throw new Error('Failed to load timetable');
+      }
+      const data = await res.json();
+      setSlots(data.slots ?? []);
+    } catch (err) {
+      console.error(err);
+      setError('Unable to load timetable. Please try again.');
+      setSlots([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-    // Tuesday
-    { id: '6', day: 'Tuesday', time: '08:00 AM', subject: 'English', teacher: 'Ms. Johnson', room: '102', color: 'green' },
-    { id: '7', day: 'Tuesday', time: '09:00 AM', subject: 'Science', teacher: 'Dr. Brown', room: '103', color: 'orange' },
-    { id: '8', day: 'Tuesday', time: '10:00 AM', subject: 'Mathematics', teacher: 'Mr. Smith', room: '101', color: 'red' },
-    { id: '9', day: 'Tuesday', time: '11:00 AM', subject: 'Computer Science', teacher: 'Ms. Lee', room: '105', color: 'pink' },
-    { id: '10', day: 'Tuesday', time: '12:00 PM', subject: 'Art', teacher: 'Mrs. Garcia', room: '106', color: 'green' },
+  useEffect(() => {
+    // Load initial timetable for default class/week
+    fetchTimetable(selectedClass, selectedWeek);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    // Wednesday
-    { id: '11', day: 'Wednesday', time: '08:00 AM', subject: 'Science', teacher: 'Dr. Brown', room: '103', color: 'orange' },
-    { id: '12', day: 'Wednesday', time: '09:00 AM', subject: 'Mathematics', teacher: 'Mr. Smith', room: '101', color: 'red' },
-    { id: '13', day: 'Wednesday', time: '10:00 AM', subject: 'History', teacher: 'Mr. Davis', room: '104', color: 'pink' },
-    { id: '14', day: 'Wednesday', time: '11:00 AM', subject: 'Physical Education', teacher: 'Mr. Wilson', room: 'Gym', color: 'red' },
-    { id: '15', day: 'Wednesday', time: '12:00 PM', subject: 'Music', teacher: 'Ms. Martinez', room: '107', color: 'green' },
+  const handleApplyFilters = () => {
+    fetchTimetable(selectedClass, selectedWeek);
+  };
 
-    // Thursday
-    { id: '16', day: 'Thursday', time: '08:00 AM', subject: 'Computer Science', teacher: 'Ms. Lee', room: '105', color: 'pink' },
-    { id: '17', day: 'Thursday', time: '09:00 AM', subject: 'English', teacher: 'Ms. Johnson', room: '102', color: 'green' },
-    { id: '18', day: 'Thursday', time: '10:00 AM', subject: 'Mathematics', teacher: 'Mr. Smith', room: '101', color: 'red' },
-    { id: '19', day: 'Thursday', time: '11:00 AM', subject: 'Science', teacher: 'Dr. Brown', room: '103', color: 'orange' },
-    { id: '20', day: 'Thursday', time: '12:00 PM', subject: 'History', teacher: 'Mr. Davis', room: '104', color: 'pink' },
+  const getWeekLabel = (week: WeekKey) => {
+    switch (week) {
+      case 'next':
+        return 'Next Week';
+      case 'previous':
+        return 'Previous Week';
+      default:
+        return 'Current Week';
+    }
+  };
 
-    // Friday
-    { id: '21', day: 'Friday', time: '08:00 AM', subject: 'Art', teacher: 'Mrs. Garcia', room: '106', color: 'green' },
-    { id: '22', day: 'Friday', time: '09:00 AM', subject: 'Music', teacher: 'Ms. Martinez', room: '107', color: 'green' },
-    { id: '23', day: 'Friday', time: '10:00 AM', subject: 'Physical Education', teacher: 'Mr. Wilson', room: 'Gym', color: 'red' },
-    { id: '24', day: 'Friday', time: '11:00 AM', subject: 'Computer Science', teacher: 'Ms. Lee', room: '105', color: 'pink' },
-    { id: '25', day: 'Friday', time: '12:00 PM', subject: 'Assembly', teacher: 'Principal', room: 'Main Hall', color: 'orange' },
-  ];
+  const handleExport = () => {
+    if (!slots.length) return;
+
+    const header = ['Day', 'Time', 'Subject', 'Teacher', 'Room'];
+    const rows = slots.map((slot) => [
+      slot.day,
+      slot.time,
+      slot.subject,
+      slot.teacher,
+      slot.room,
+    ]);
+
+    const csvContent = [header, ...rows]
+      .map((cols) =>
+        cols
+          .map((value) => `"${String(value).replace(/"/g, '""')}"`)
+          .join(','),
+      )
+      .join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute(
+      'download',
+      `timetable-${selectedClass}-${selectedWeek}.csv`,
+    );
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
+  const handlePrint = () => {
+    if (typeof window === 'undefined') return;
+    window.print();
+  };
+
+  const filteredSlots = slots.filter((slot) => {
+    const matchesSubject =
+      subjectFilter === 'all' || slot.subject === subjectFilter;
+    const matchesTeacher =
+      teacherFilter === 'all' || slot.teacher === teacherFilter;
+    const matchesDay = dayFilter === 'all' || slot.day === dayFilter;
+    return matchesSubject && matchesTeacher && matchesDay;
+  });
+
+  const uniqueSubjects = Array.from(new Set(slots.map((s) => s.subject)));
+  const uniqueTeachers = Array.from(new Set(slots.map((s) => s.teacher)));
+  const uniqueDays = Array.from(new Set(slots.map((s) => s.day)));
+
+  const openEditDialog = (params: {
+    day: string;
+    time: string;
+    slot: TimeSlot | null;
+  }) => {
+    const { day, time, slot } = params;
+    if (slot) {
+      setEditData({
+        id: slot.id,
+        day: slot.day,
+        time: slot.time,
+        subject: slot.subject,
+        teacher: slot.teacher,
+        room: slot.room,
+      });
+    } else {
+      setEditData({
+        day,
+        time,
+        subject: '',
+        teacher: '',
+        room: '',
+      });
+    }
+  };
+
+  const handleSaveEdit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editData) return;
+
+    try {
+      setIsSaving(true);
+      const res = await fetch('/api/timetable', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          classId: selectedClass,
+          week: selectedWeek,
+          slotId: editData.id,
+          day: editData.day,
+          time: editData.time,
+          subject: editData.subject,
+          teacher: editData.teacher,
+          room: editData.room,
+        }),
+      });
+      if (!res.ok) {
+        throw new Error('Failed to save timetable entry');
+      }
+      const data = await res.json();
+      setSlots(data.slots ?? []);
+      setEditData(null);
+    } catch (err) {
+      console.error(err);
+      setError('Unable to save changes. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="p-4 md:p-8 space-y-8">
@@ -60,15 +203,31 @@ export default function TimetablePage() {
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Timetable</h1>
-          <p className="text-gray-600 mt-2 text-sm md:text-base">View and manage class schedules</p>
+          <p className="text-gray-600 mt-2 text-sm md:text-base">
+            View and manage schedules for{' '}
+            <span className="font-semibold text-gray-900">
+              Class {selectedClass}
+            </span>{' '}
+            ({getWeekLabel(selectedWeek)})
+          </p>
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2 text-sm md:text-base">
+          <Button
+            variant="outline"
+            className="gap-2 text-sm md:text-base"
+            onClick={handleExport}
+            disabled={!slots.length}
+          >
             <Download className="w-4 h-4" />
             <span className="hidden md:inline">Export</span>
           </Button>
-          <Button variant="outline" className="gap-2 text-sm md:text-base">
+          <Button
+            variant="outline"
+            className="gap-2 text-sm md:text-base"
+            onClick={handlePrint}
+            disabled={!slots.length}
+          >
             <Printer className="w-4 h-4" />
             <span className="hidden md:inline">Print</span>
           </Button>
@@ -100,7 +259,10 @@ export default function TimetablePage() {
             <label className="block text-sm font-medium text-gray-900 mb-2">
               Week
             </label>
-            <Select value={selectedWeek} onValueChange={setSelectedWeek}>
+            <Select
+              value={selectedWeek}
+              onValueChange={(value: WeekKey) => setSelectedWeek(value)}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -113,16 +275,84 @@ export default function TimetablePage() {
           </div>
 
           <div className="flex items-end">
-            <Button className="w-full bg-[#E74C3C] hover:bg-red-700 text-white">
-              Apply Filters
+            <Button
+              className="w-full bg-[#E74C3C] hover:bg-red-700 text-white"
+              onClick={handleApplyFilters}
+              disabled={isLoading}
+            >
+              {isLoading ? 'Loading...' : 'Apply Filters'}
             </Button>
+          </div>
+        </div>
+      </Card>
+
+      {/* Additional Filters */}
+      <Card className="p-6 border border-gray-200">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-2">
+              Subject
+            </label>
+            <select
+              value={subjectFilter}
+              onChange={(e) => setSubjectFilter(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent"
+            >
+              <option value="all">All Subjects</option>
+              {uniqueSubjects.map((subject) => (
+                <option key={subject} value={subject}>
+                  {subject}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-2">
+              Teacher
+            </label>
+            <select
+              value={teacherFilter}
+              onChange={(e) => setTeacherFilter(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent"
+            >
+              <option value="all">All Teachers</option>
+              {uniqueTeachers.map((teacher) => (
+                <option key={teacher} value={teacher}>
+                  {teacher}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-900 mb-2">
+              Day
+            </label>
+            <select
+              value={dayFilter}
+              onChange={(e) => setDayFilter(e.target.value)}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent"
+            >
+              <option value="all">All Days</option>
+              {uniqueDays.map((day) => (
+                <option key={day} value={day}>
+                  {day}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
       </Card>
 
       {/* Timetable Grid */}
       <Card className="p-6 border border-gray-200 overflow-hidden">
-        <TimetableGrid slots={timetableData} />
+        {error ? (
+          <p className="text-sm text-red-600">{error}</p>
+        ) : (
+          <TimetableGrid
+            slots={filteredSlots}
+            onCellClick={openEditDialog}
+          />
+        )}
       </Card>
 
       {/* Legend */}
@@ -147,6 +377,105 @@ export default function TimetablePage() {
           </div>
         </div>
       </Card>
+
+      {/* Edit Dialog (simple inline card overlay) */}
+      {editData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              {editData.id ? 'Edit Timetable Entry' : 'Add Timetable Entry'}
+            </h2>
+            <form onSubmit={handleSaveEdit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-1">
+                    Day
+                  </label>
+                  <input
+                    type="text"
+                    value={editData.day}
+                    onChange={(e) =>
+                      setEditData({ ...editData, day: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-900 mb-1">
+                    Time
+                  </label>
+                  <input
+                    type="text"
+                    value={editData.time}
+                    onChange={(e) =>
+                      setEditData({ ...editData, time: e.target.value })
+                    }
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-1">
+                  Subject
+                </label>
+                <input
+                  type="text"
+                  value={editData.subject}
+                  onChange={(e) =>
+                    setEditData({ ...editData, subject: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-1">
+                  Teacher
+                </label>
+                <input
+                  type="text"
+                  value={editData.teacher}
+                  onChange={(e) =>
+                    setEditData({ ...editData, teacher: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-900 mb-1">
+                  Room
+                </label>
+                <input
+                  type="text"
+                  value={editData.room}
+                  onChange={(e) =>
+                    setEditData({ ...editData, room: e.target.value })
+                  }
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent"
+                  required
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setEditData(null)}
+                  className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSaving}
+                  className="px-4 py-2 text-sm font-medium text-white bg-[#E74C3C] hover:bg-red-700 rounded-lg disabled:opacity-70"
+                >
+                  {isSaving ? 'Saving...' : 'Save'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

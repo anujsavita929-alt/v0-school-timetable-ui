@@ -12,6 +12,8 @@ import {
   X
 } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { sessionStorage } from '@/lib/session';
 import { Button } from '@/components/ui/button';
 
 interface SidebarProps {
@@ -20,6 +22,7 @@ interface SidebarProps {
 
 export function Sidebar({ role = 'student' }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
 
   const getNavItems = () => {
@@ -91,6 +94,7 @@ export function Sidebar({ role = 'student' }: SidebarProps) {
           <Button
             variant="ghost"
             className="w-full justify-start text-gray-700 hover:bg-gray-100"
+            onClick={() => router.push('/dashboard')}
           >
             <Settings className="w-5 h-5 mr-3" />
             Settings
@@ -98,6 +102,10 @@ export function Sidebar({ role = 'student' }: SidebarProps) {
           <Button
             variant="ghost"
             className="w-full justify-start text-red-600 hover:bg-red-50"
+            onClick={() => {
+              sessionStorage.clear();
+              router.push('/role-selection');
+            }}
           >
             <LogOut className="w-5 h-5 mr-3" />
             Logout
@@ -159,6 +167,10 @@ export function Sidebar({ role = 'student' }: SidebarProps) {
               <Button
                 variant="ghost"
                 className="w-full justify-start text-gray-700 hover:bg-gray-100"
+                onClick={() => {
+                  setIsOpen(false);
+                  router.push('/dashboard');
+                }}
               >
                 <Settings className="w-5 h-5 mr-3" />
                 Settings
@@ -166,6 +178,11 @@ export function Sidebar({ role = 'student' }: SidebarProps) {
               <Button
                 variant="ghost"
                 className="w-full justify-start text-red-600 hover:bg-red-50"
+                onClick={() => {
+                  setIsOpen(false);
+                  sessionStorage.clear();
+                  router.push('/role-selection');
+                }}
               >
                 <LogOut className="w-5 h-5 mr-3" />
                 Logout

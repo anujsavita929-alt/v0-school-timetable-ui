@@ -5,9 +5,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Clock, ArrowLeft } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { Card } from '@/components/ui/card';
 
 export default function CreateOrganizationPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
     code: '',
@@ -32,11 +34,28 @@ export default function CreateOrganizationPage() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (validateForm()) {
-      // In a real app, this would submit to a backend
-      alert('Organization created successfully!');
+      try {
+        setIsSubmitting(true);
+        const res = await fetch('/api/organizations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData),
+        });
+        if (!res.ok) {
+          throw new Error('Failed to create organization');
+        }
+        router.push('/organizations/manage');
+      } catch (error) {
+        console.error(error);
+        alert('Failed to create organization. Please try again.');
+      } finally {
+        setIsSubmitting(false);
+      }
     }
   };
 
@@ -135,9 +154,10 @@ export default function CreateOrganizationPage() {
               </Link>
               <Button
                 type="submit"
-                className="flex-1 bg-[#E74C3C] hover:bg-red-700 text-white"
+                disabled={isSubmitting}
+                className="flex-1 bg-[#E74C3C] hover:bg-red-700 text-white disabled:opacity-70"
               >
-                Create Organization
+                {isSubmitting ? 'Creating...' : 'Create Organization'}
               </Button>
             </div>
           </form>

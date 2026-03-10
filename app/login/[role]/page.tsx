@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Clock, Eye, EyeOff, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { sessionStorage } from '@/lib/session';
 
 export default function LoginPage() {
   const params = useParams();
@@ -46,8 +47,14 @@ export default function LoginPage() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    // Simulate login
+    // Simulate login and create a simple client-side session
     setTimeout(() => {
+      sessionStorage.set({
+        id: 'demo-user',
+        role: role as 'principal' | 'teacher' | 'student',
+        name: 'Demo User',
+        email,
+      });
       router.push(`/dashboard/${role}`);
     }, 500);
   };

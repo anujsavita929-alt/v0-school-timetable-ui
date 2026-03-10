@@ -1,6 +1,5 @@
 'use client';
 
-import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
 export interface TimeSlot {
@@ -16,6 +15,11 @@ export interface TimeSlot {
 interface TimetableGridProps {
   slots: TimeSlot[];
   isTeacherView?: boolean;
+  onCellClick?: (params: {
+    day: string;
+    time: string;
+    slot: TimeSlot | null;
+  }) => void;
 }
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
@@ -29,14 +33,28 @@ const TIME_SLOTS = [
   '02:00 PM',
 ];
 
-const COLOR_MAP: Record<string, string> = {
-  red: '#E74C3C',
-  green: '#27AE60',
-  orange: '#F39C12',
-  pink: '#E83E8C',
+const SUBJECT_COLOR_MAP: Record<string, string> = {
+  Mathematics: '#E74C3C',
+  English: '#27AE60',
+  Science: '#F39C12',
+  History: '#8E44AD',
+  'Computer Science': '#3498DB',
+  Art: '#E67E22',
+  Music: '#E83E8C',
+  'Physical Education': '#16A085',
+  Assembly: '#D35400',
+  Others: '#7F8C8D',
 };
 
-export function TimetableGrid({ slots, isTeacherView = false }: TimetableGridProps) {
+const getColorForSubject = (subject: string) => {
+  return SUBJECT_COLOR_MAP[subject] ?? SUBJECT_COLOR_MAP.Others;
+};
+
+export function TimetableGrid({
+  slots,
+  isTeacherView = false,
+  onCellClick,
+}: TimetableGridProps) {
   const getSlotForDayAndTime = (day: string, time: string) => {
     return slots.find((slot) => slot.day === day && slot.time === time);
   };
@@ -77,7 +95,7 @@ export function TimetableGrid({ slots, isTeacherView = false }: TimetableGridPro
               {/* Cells for each day */}
               {DAYS.map((day) => {
                 const slot = getSlotForDayAndTime(day, time);
-                const bgColor = slot ? COLOR_MAP[slot.color] : 'transparent';
+                const bgColor = slot ? getColorForSubject(slot.subject) : 'transparent';
 
                 return (
                   <div
@@ -88,6 +106,13 @@ export function TimetableGrid({ slots, isTeacherView = false }: TimetableGridPro
                       borderLeftColor: slot ? bgColor : 'transparent',
                       borderLeftWidth: slot ? '4px' : '1px',
                     }}
+                    onClick={() =>
+                      onCellClick?.({
+                        day,
+                        time,
+                        slot: slot ?? null,
+                      })
+                    }
                   >
                     {slot ? (
                       <div className="space-y-2">

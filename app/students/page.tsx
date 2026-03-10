@@ -13,10 +13,17 @@ import {
 } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Search, Plus, Edit, Trash2, Download } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
+import { useSearchParams } from 'next/navigation';
 
 export default function StudentsPage() {
-  const [searchTerm, setSearchTerm] = useState('');
+  const searchParams = useSearchParams();
+  const initialSearch = useMemo(
+    () => searchParams.get('q') ?? '',
+    [searchParams],
+  );
+
+  const [searchTerm, setSearchTerm] = useState(initialSearch);
   const [selectedClass, setSelectedClass] = useState('all');
 
   const students = [
@@ -104,7 +111,43 @@ export default function StudentsPage() {
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2">
+          <Button
+            variant="outline"
+            className="gap-2"
+            onClick={() => {
+              if (!filteredStudents.length) return;
+
+              const header = ['Name', 'Student ID', 'Class', 'Email', 'Phone', 'Status'];
+              const rows = filteredStudents.map((student) => [
+                student.name,
+                student.studentId,
+                student.class,
+                student.email,
+                student.phone,
+                student.status,
+              ]);
+
+              const csvContent = [header, ...rows]
+                .map((cols) =>
+                  cols
+                    .map((value) => `"${String(value).replace(/"/g, '""')}"`)
+                    .join(','),
+                )
+                .join('\n');
+
+              const blob = new Blob([csvContent], {
+                type: 'text/csv;charset=utf-8;',
+              });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', 'students-export.csv');
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              URL.revokeObjectURL(url);
+            }}
+          >
             <Download className="w-4 h-4" />
             Export
           </Button>
