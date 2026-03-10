@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ──────────────────────────────────────────────────────────────
+// Core Models
+// ──────────────────────────────────────────────────────────────
+
+model Organization {
+  id          String   @id @default(uuid())
+  name        String
+  code        String   @unique
+  email       String?
+  phone       String?
+  address     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  teachers    Teacher[]
+  classGroups ClassGroup[]
+  subjects    Subject[]
+  periodSlots PeriodSlot[]
+  timetableEntries TimetableEntry[]
+}
+
+model Teacher {
+  id                 String   @id @default(uuid())
+  organizationId     String
+  name               String
+  email              String   @unique
+  department         String?
+  maxPeriodsPerDay   Int      @default(6)
+  isActive           Boolean  @default(true)
+
+  organization       Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  subjects           Subject[]    @relation("TeacherSubjects")
+  absences           Absence[]
+  timetableEntries   TimetableEntry[]
+
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+}
+
+model Subject {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String
+  shortName      String
+  weeklyHours    Int      @default(5)
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  teachers       Teacher[]    @relation("TeacherSubjects")
+  timetableEntries TimetableEntry[]
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model ClassGroup {
+  id             String   @id @default(uuid())
+  organizationId String
+  name           String   // e.g. "10-A", "11-B"
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  timetableEntries TimetableEntry[]
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+}
+
+model PeriodSlot {
+  id             String   @id @default(uuid())
+  organizationId String
+  dayOfWeek      Int      // 0=Sunday ... 6=Saturday
+  startTime      String   // "08:00"
+  endTime        String   // "08:40"
+  isBreak        Boolean  @default(false)
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  timetableEntries TimetableEntry[]
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([organizationId, dayOfWeek, startTime])
+}
+
+model TimetableEntry {
+  id             String   @id @default(uuid())
+  organizationId String
+  classGroupId   String
+  periodSlotId   String
+  teacherId      String?
+  subjectId      String?
+  room           String?
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  classGroup     ClassGroup   @relation(fields: [classGroupId], references: [id])
+  periodSlot     PeriodSlot   @relation(fields: [periodSlotId], references: [id])
+  teacher        Teacher?     @relation(fields: [teacherId], references: [id])
+  subject        Subject?     @relation(fields: [subjectId], references: [id])
+
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+
+  @@unique([classGroupId, periodSlotId])
+}
+
+model Absence {
+  id          String   @id @default(uuid())
+  teacherId   String
+  date        DateTime
+  periodIds   String[] // JSON array of periodSlot IDs
+  reason      String
+  status      String   @default("pending") // pending | approved | rejected
+  notes       String?
+
+  teacher     Teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
