@@ -8,3 +8,8 @@ node_modules/
 .next/
 .env*.local
 .DS_Store
+.env
+.env.development
+.env.production
+prisma/dev.db   # if using SQLite locally for testing
+
