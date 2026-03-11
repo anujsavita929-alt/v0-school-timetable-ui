@@ -11,7 +11,7 @@ This project provides role-based access for different users (students, teachers,
 
 - **Role-based authentication**
   - Role selection screen
-  - Login pages for different roles (`/login/student`, `/login/teacher`, `/login/principal`, etc.)
+  - Login pages for diff erent roles (`/login/student`, `/login/teacher`, `/login/principal`, etc.)
 - **User registration** (`/signup`)
 - **Dashboard** – personalized view after login (`/dashboard`)
 - **Timetable management** (`/timetable`)
