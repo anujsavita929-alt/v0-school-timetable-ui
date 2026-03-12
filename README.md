@@ -1,8 +1,9 @@
-# School Timetable Management UIX
+# School Timetable Management UI
 
 A modern, responsive web application for managing school timetables, built with **Next.js 16 (App Router)**, **TypeScript**, **Tailwind CSS**, and **shadcn/ui** components. Generated with help from **v0.dev**.
 
-This project provides role-based access for different users (students, teachers, principals/admins) to view, manage, and interact with school schedules, students, teachers, and organizations.
+This project provides role-based
+ access for different users (students, teachers, principals/admins) to view, manage, and interact with school schedules, students, teachers, and organizations.
 
 ![School Timetable Preview](https://via.placeholder.com/1200x600?text=School+Timetable+UI+Preview)  
 *(Add a real screenshot here later – see instructions below)*

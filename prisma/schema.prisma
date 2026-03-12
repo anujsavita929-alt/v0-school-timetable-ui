@@ -1,11 +1,9 @@
 generator client {
   provider = "prisma-client-js"
 }
-
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
 }
-
 // ──────────────────────────────────────────────────────────────
 // Core Models
 // ──────────────────────────────────────────────────────────────
@@ -114,7 +112,7 @@ model Absence {
   id          String   @id @default(uuid())
   teacherId   String
   date        DateTime
-  periodIds   String[] // JSON array of periodSlot IDs
+  periodIds   String   // JSON string of periodSlot IDs
   reason      String
   status      String   @default("pending") // pending | approved | rejected
   notes       String?
