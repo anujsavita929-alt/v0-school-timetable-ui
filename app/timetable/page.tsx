@@ -10,8 +10,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { TimetableGrid } from '@/components/timetable/TimetableGrid';
-import { Download, Printer } from 'lucide-react';
+import { Download, Printer, Sparkles } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { GenerateTimetableModal } from '@/components/generate-timetable-modal';
+import { toast } from 'sonner';
 
 interface TimeSlot {
   id: string;
@@ -43,6 +45,14 @@ export default function TimetablePage() {
   const [subjectFilter, setSubjectFilter] = useState<string>('all');
   const [teacherFilter, setTeacherFilter] = useState<string>('all');
   const [dayFilter, setDayFilter] = useState<string>('all');
+  const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
+  const [userRole, setUserRole] = useState<string>('');
+
+  // Check user role on mount
+  useEffect(() => {
+    // Mock role check - replace with actual auth
+    setUserRole('principal'); // Change this based on actual user session
+  }, []);
 
   const fetchTimetable = async (classId: string, week: WeekKey) => {
     try {
@@ -189,12 +199,24 @@ export default function TimetablePage() {
       const data = await res.json();
       setSlots(data.slots ?? []);
       setEditData(null);
+      toast.success('Timetable entry saved successfully');
     } catch (err) {
       console.error(err);
       setError('Unable to save changes. Please try again.');
+      toast.error('Failed to save timetable entry');
     } finally {
       setIsSaving(false);
     }
+  };
+
+  const handleGenerateSuccess = () => {
+    setIsGenerateModalOpen(false);
+    toast.success('Timetable generated successfully');
+    fetchTimetable(selectedClass, selectedWeek);
+  };
+
+  const handleGenerateError = (error: string) => {
+    toast.error(error);
   };
 
   return (
@@ -213,6 +235,15 @@ export default function TimetablePage() {
         </div>
 
         <div className="flex gap-2">
+          {userRole === 'principal' && (
+            <Button
+              onClick={() => setIsGenerateModalOpen(true)}
+              className="gap-2 bg-[#E74C3C] hover:bg-red-700 text-white"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span className="hidden md:inline">Generate Timetable</span>
+            </Button>
+          )}
           <Button
             variant="outline"
             className="gap-2 text-sm md:text-base"
@@ -476,6 +507,14 @@ export default function TimetablePage() {
           </div>
         </div>
       )}
+
+      {/* Generate Timetable Modal */}
+      <GenerateTimetableModal
+        isOpen={isGenerateModalOpen}
+        onClose={() => setIsGenerateModalOpen(false)}
+        onSuccess={handleGenerateSuccess}
+        onError={handleGenerateError}
+      />
     </div>
   );
 }
