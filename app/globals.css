@@ -38,13 +38,16 @@
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
 
-  /* School Timetable System Colors */
   --brand-red: #E74C3C;
   --brand-green: #27AE60;
   --brand-pink: #E83E8C;
   --brand-orange: #F39C12;
   --brand-light-gray: #F8F9FA;
   --brand-dark-gray: #2C3E50;
+
+  --glow-red:   rgba(231, 76, 60, 0.22);
+  --glow-green: rgba(39, 174, 96, 0.22);
+  --glow-pink:  rgba(232, 62, 140, 0.22);
 }
 
 .dark {
@@ -80,6 +83,10 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
+
+  --glow-red:   rgba(231, 76, 60, 0.35);
+  --glow-green: rgba(39, 174, 96, 0.32);
+  --glow-pink:  rgba(232, 62, 140, 0.32);
 }
 
 @theme inline {
@@ -133,120 +140,88 @@
 }
 
 @layer utilities {
-  /* 2xl Rounded Cards */
-  .card-2xl {
-    @apply rounded-2xl;
-  }
+  .card-2xl { @apply rounded-2xl; }
+  .card-soft-shadow { @apply shadow-md; }
+  .card-hover { @apply transition-all duration-200 hover:shadow-lg hover:scale-102 rounded-2xl; }
+  .btn-press { @apply transition-transform duration-100 active:scale-98; }
+  .smooth-transition { @apply transition-all duration-300 ease-in-out; }
+  .count-up { @apply tabular-nums; }
 
-  .card-soft-shadow {
-    @apply shadow-md;
-  }
-
-  /* Card hover lift effect */
-  .card-hover {
-    @apply transition-all duration-200 hover:shadow-lg hover:scale-102 rounded-2xl;
-  }
-
-  /* Button press effect */
-  .btn-press {
-    @apply transition-transform duration-100 active:scale-98;
-  }
-
-  /* Smooth transitions */
-  .smooth-transition {
-    @apply transition-all duration-300 ease-in-out;
-  }
-
-  /* Count animation for stats */
-  .count-up {
-    @apply tabular-nums;
-  }
-
-  /* Form field styling */
   .form-input {
     @apply w-full px-4 py-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent bg-white text-gray-900 placeholder-gray-500;
   }
+  .form-label { @apply block text-sm font-medium text-gray-900 mb-2; }
+  .form-error { @apply text-sm text-red-600 mt-1; }
+  .modal-backdrop { @apply fixed inset-0 bg-black/50 z-40; }
+  .space-y-section { @apply space-y-8; }
+  .space-x-section { @apply space-x-8; }
 
-  .form-label {
-    @apply block text-sm font-medium text-gray-900 mb-2;
-  }
-
-  .form-error {
-    @apply text-sm text-red-600 mt-1;
-  }
-
-  /* Modal backdrop */
-  .modal-backdrop {
-    @apply fixed inset-0 bg-black/50 z-40;
-  }
-
-  /* Consistent spacing */
-  .space-y-section {
-    @apply space-y-8;
-  }
-
-  .space-x-section {
-    @apply space-x-8;
-  }
-
-  /* Status badges */
-  .badge-active {
-    @apply bg-[#27AE60]/10 text-[#27AE60] px-3 py-1 rounded-full text-sm font-medium;
-  }
-
-  .badge-inactive {
-    @apply bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium;
-  }
-
-  .badge-pending {
-    @apply bg-[#F39C12]/10 text-[#F39C12] px-3 py-1 rounded-full text-sm font-medium;
-  }
-
-  .badge-error {
-    @apply bg-[#E74C3C]/10 text-[#E74C3C] px-3 py-1 rounded-full text-sm font-medium;
-  }
+  .badge-active   { @apply bg-[#27AE60]/10 text-[#27AE60] px-3 py-1 rounded-full text-sm font-medium; }
+  .badge-inactive { @apply bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-sm font-medium; }
+  .badge-pending  { @apply bg-[#F39C12]/10 text-[#F39C12] px-3 py-1 rounded-full text-sm font-medium; }
+  .badge-error    { @apply bg-[#E74C3C]/10 text-[#E74C3C] px-3 py-1 rounded-full text-sm font-medium; }
 }
 
-/* Animations */
+/* ── Animations ───────────────────────────────────────── */
 @keyframes fall {
-  0% {
-    transform: translateY(-100vh) rotate(0deg);
-    opacity: 1;
-  }
-  100% {
-    transform: translateY(100vh) rotate(360deg);
-    opacity: 0;
-  }
+  0%   { transform: translateY(-100vh) rotate(0deg);   opacity: 1; }
+  100% { transform: translateY(100vh)  rotate(360deg); opacity: 0; }
 }
-
 @keyframes slideInUp {
-  0% {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
+  0%   { transform: translateY(20px); opacity: 0; }
+  100% { transform: translateY(0);    opacity: 1; }
 }
-
 @keyframes pulse-subtle {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.8;
-  }
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.8; }
 }
 
-.animate-fall {
-  animation: fall linear forwards;
+.animate-fall          { animation: fall linear forwards; }
+.animate-slide-in-up   { animation: slideInUp 0.5s ease-out; }
+.animate-pulse-subtle  { animation: pulse-subtle 2s ease-in-out infinite; }
+
+/* ── Role-selection / landing enhancements ───────────── */
+.arcane {
+  font-family: 'Cinzel', serif;
+  letter-spacing: 0.02em;
 }
 
-.animate-slide-in-up {
-  animation: slideInUp 0.5s ease-out;
+.card-glow-red   { box-shadow: 0 4px 6px -1px rgba(0,0,0,.07), 0 12px 40px var(--glow-red);   }
+.card-glow-green { box-shadow: 0 4px 6px -1px rgba(0,0,0,.07), 0 12px 40px var(--glow-green); }
+.card-glow-pink  { box-shadow: 0 4px 6px -1px rgba(0,0,0,.07), 0 12px 40px var(--glow-pink);  }
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px)  rotate(0deg); }
+  50%       { transform: translateY(-7px) rotate(2deg); }
+}
+.float-0 { animation: float 3.8s ease-in-out infinite; }
+.float-1 { animation: float 4.2s ease-in-out infinite 0.6s; }
+.float-2 { animation: float 3.5s ease-in-out infinite 1.2s; }
+.float-3 { animation: float 4.0s ease-in-out infinite 1.8s; }
+
+@keyframes shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+.shimmer-text {
+  background: linear-gradient(90deg,
+    var(--foreground) 20%,
+    #E74C3C 45%,
+    #E83E8C 55%,
+    var(--foreground) 80%
+  );
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shimmer 5s linear infinite;
 }
 
-.animate-pulse-subtle {
-  animation: pulse-subtle 2s ease-in-out infinite;
+@keyframes orb-drift {
+  0%, 100% { transform: translate(0, 0)     scale(1);    }
+  33%       { transform: translate(20px, -15px) scale(1.05); }
+  66%       { transform: translate(-10px, 10px) scale(0.97); }
 }
+.orb   { animation: orb-drift 12s ease-in-out infinite; }
+.orb-2 { animation: orb-drift 15s ease-in-out infinite reverse; }
+.orb-3 { animation: orb-drift 10s ease-in-out infinite 3s; }
