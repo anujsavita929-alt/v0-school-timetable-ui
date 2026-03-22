@@ -164,8 +164,8 @@ export default function CreateOrganizationPage() {
         </Card>
 
         {/* Info Box */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-2xl p-6">
-          <p className="text-sm text-blue-900">
+        <div className="mt-8 bg-red-50 border border-red-200 rounded-2xl p-6">
+          <p className="text-sm text-red-900">
             <span className="font-semibold">Note:</span> You can add teachers and students to this organization after creation. Organization codes help with quick joining.
           </p>
         </div>

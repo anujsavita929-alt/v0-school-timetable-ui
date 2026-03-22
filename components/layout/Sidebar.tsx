@@ -27,20 +27,22 @@ export function Sidebar({ role = 'student' }: SidebarProps) {
 
   const getNavItems = () => {
     const commonItems = [
-      { href: '/dashboard', label: 'Dashboard', icon: Home },
+      { href: `/dashboard/${role}`, label: 'Dashboard', icon: Home },
       { href: '/timetable', label: 'Timetable', icon: Clock },
     ];
 
     if (role === 'principal') {
       return [
         ...commonItems,
-        { href: '/students', label: 'Students', icon: Users },
-        { href: '/teachers', label: 'Teachers', icon: Users },
+        { href: '/dashboard/principal/students', label: 'Students', icon: Users },
+        { href: '/dashboard/principal/teachers', label: 'Teachers', icon: Users },
+        { href: '/dashboard/principal/classes', label: 'Classes', icon: Users },
+        { href: '/dashboard/principal/timetable/generate', label: 'Timetable Generator', icon: Settings },
       ];
     } else if (role === 'teacher') {
       return [
         ...commonItems,
-        { href: '/my-classes', label: 'My Classes', icon: Users },
+        { href: '/dashboard/teacher/my-classes', label: 'My Classes', icon: Users },
       ];
     }
 
@@ -50,6 +52,7 @@ export function Sidebar({ role = 'student' }: SidebarProps) {
   const navItems = getNavItems();
 
   const isActive = (href: string) => {
+    if (href === `/dashboard/${role}`) return pathname === href;
     return pathname === href || pathname.startsWith(href + '/');
   };
 
