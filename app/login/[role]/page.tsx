@@ -204,7 +204,7 @@ export default function LoginPage() {
         </div>
 
         {/* Demo Credentials */}
-        <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+        <div className="mt-8 bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-800">
           <p className="font-semibold mb-2">Demo Credentials:</p>
           <p>Email: demo@schooltime.com</p>
           <p>Password: demo123</p>

@@ -1,271 +1,219 @@
-'use client';
+"use client";
 
-import { Users, BookOpen, Clock, TrendingUp } from 'lucide-react';
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { 
+  Users, 
+  UserCheck, 
+  TrendingUp, 
+  Bell, 
+  Calendar,
+  Clock,
+  ChevronRight,
+  ArrowRight,
+  BookOpen,
+  Coffee,
+  Plus,
+  School as SchoolIcon
+} from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+interface Notification {
+  id: number;
+  type: string;
+  message: string;
+  time: string;
+  read: boolean;
+}
 
 export default function PrincipalDashboard() {
-  const [stats, setStats] = useState([
-    { label: 'Total Students', value: 0, icon: Users, color: '#E74C3C' },
-    { label: 'Total Teachers', value: 0, icon: BookOpen, color: '#27AE60' },
-    { label: 'Active Classes', value: 0, icon: Clock, color: '#F39C12' },
-    { label: 'This Month', value: 0, icon: TrendingUp, color: '#E83E8C' },
-  ]);
-
-  // Animate counter on mount
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  
+  // Listen for notifications in localStorage
   useEffect(() => {
-    const finalValues = [
-      { label: 'Total Students', value: 450, icon: Users, color: '#E74C3C' },
-      { label: 'Total Teachers', value: 35, icon: BookOpen, color: '#27AE60' },
-      { label: 'Active Classes', value: 12, icon: Clock, color: '#F39C12' },
-      { label: 'This Month', value: 98, icon: TrendingUp, color: '#E83E8C' },
-    ];
+    const loadNotifications = () => {
+      const stored = localStorage.getItem("admin_notifications");
+      if (stored) {
+        setNotifications(JSON.parse(stored).reverse());
+      }
+    };
 
-    const duration = 2000; // 2 seconds
-    const startTime = Date.now();
+    loadNotifications();
 
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / duration, 1);
+    // Listen for storage changes (for cross-tab support)
+    window.addEventListener("storage", loadNotifications);
+    
+    // Check every few seconds as well for same-tab updates
+    const interval = setInterval(loadNotifications, 3000);
 
-      setStats(
-        finalValues.map((stat) => ({
-          ...stat,
-          value: Math.floor(stat.value * progress),
-        }))
-      );
-
-      if (progress === 1) clearInterval(interval);
-    }, 30);
-
-    return () => clearInterval(interval);
+    return () => {
+      window.removeEventListener("storage", loadNotifications);
+      clearInterval(interval);
+    };
   }, []);
 
-  const todaysSchedule = [
+  const stats = [
     {
-      id: 1,
-      time: '10:00 AM',
-      event: 'Morning Assembly',
-      location: 'Main Hall',
-      type: 'event',
+      title: "Total Students",
+      value: "450",
+      description: "+12 from last month",
+      icon: Users,
+      color: "bg-red-500",
+      href: "/dashboard/principal/students"
     },
     {
-      id: 2,
-      time: '12:00 PM',
-      event: 'Class 10-A Mathematics',
-      location: 'Room 101',
-      type: 'class',
+      title: "Total Teachers",
+      value: "35",
+      description: "2 on leave today",
+      icon: BookOpen,
+      color: "bg-emerald-500",
+      href: "/dashboard/principal/teachers"
     },
     {
-      id: 3,
-      time: '1:00 PM',
-      event: 'Staff Meeting',
-      location: 'Principal Office',
-      type: 'meeting',
+      title: "Active Classes",
+      value: "12",
+      description: "85% occupancy",
+      icon: Clock,
+      color: "bg-orange-500",
+      href: "/dashboard/principal/classes"
     },
+    {
+      title: "This Month",
+      value: "98",
+      description: "+2% increase",
+      icon: TrendingUp,
+      color: "bg-pink-500",
+      href: "#"
+    }
   ];
 
-  const recentActivity = [
-    {
-      id: 1,
-      action: 'New student enrolled',
-      description: 'Akshay Kumar joined Class 9-B',
-      time: '2 hours ago',
-      icon: Users,
-    },
-    {
-      id: 2,
-      action: 'Teacher assigned',
-      description: 'Ms. Priya assigned to Physics',
-      time: '4 hours ago',
-      icon: BookOpen,
-    },
-    {
-      id: 3,
-      action: 'Schedule updated',
-      description: 'Class 10-A schedule changed',
-      time: '1 day ago',
-      icon: Clock,
-    },
-  ];
+  const markAsRead = (id: number) => {
+    const updated = notifications.map(n => n.id === id ? { ...n, read: true } : n);
+    setNotifications(updated);
+    localStorage.setItem("admin_notifications", JSON.stringify(updated.reverse()));
+  };
 
   return (
-    <div className="p-8 space-y-8">
-      {/* Header */}
-      <div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Principal Dashboard</h1>
-        <p className="text-gray-600">Welcome back! Here's your school overview.</p>
-      </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          return (
-            <Card key={stat.label} className="p-6 border border-gray-200 hover:shadow-md transition-shadow">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-gray-600 text-sm font-medium">{stat.label}</p>
-                  <p className="text-3xl font-bold text-gray-900 mt-2 count-up">
-                    {stat.value}
-                  </p>
-                </div>
-                <div
-                  className="p-3 rounded-lg"
-                  style={{ backgroundColor: `${stat.color}20` }}
-                >
-                  <Icon
-                    className="w-6 h-6"
-                    style={{ color: stat.color }}
-                  />
-                </div>
-              </div>
-            </Card>
-          );
-        })}
-      </div>
-
-      {/* Main Content Grid */}
-      <div className="grid md:grid-cols-3 gap-8">
-        {/* Today's Schedule */}
-        <div className="md:col-span-2">
-          <Card className="p-6 border border-gray-200">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-gray-900">Today's Schedule</h2>
-              <Link href="/timetable">
-                <Button variant="outline" size="sm">
-                  View Full Schedule
-                </Button>
-              </Link>
-            </div>
-
-            <div className="space-y-4">
-              {todaysSchedule.map((item) => (
-                <div
-                  key={item.id}
-                  className="flex items-start gap-4 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <div className="flex-shrink-0">
-                    <div className="flex items-center justify-center w-12 h-12 bg-[#E74C3C]/10 rounded-lg">
-                      <Clock className="w-6 h-6 text-[#E74C3C]" />
-                    </div>
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-semibold text-gray-900">{item.event}</p>
-                    <p className="text-sm text-gray-600">{item.location}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-gray-900">{item.time}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </div>
-
-        {/* Quick Actions */}
+    <div className="p-6 space-y-8 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <Card className="p-6 border border-gray-200">
-            <h2 className="text-xl font-bold text-gray-900 mb-4">Quick Actions</h2>
-            <div className="space-y-3">
-              <Link href="/students" className="block">
-                <Button className="w-full bg-[#E74C3C] hover:bg-red-700 text-white justify-start">
-                  <Users className="w-4 h-4 mr-2" />
-                  Manage Students
-                </Button>
-              </Link>
-              <Link href="/teachers" className="block">
-                <Button className="w-full bg-[#27AE60] hover:bg-green-700 text-white justify-start">
-                  <BookOpen className="w-4 h-4 mr-2" />
-                  Manage Teachers
-                </Button>
-              </Link>
-              <Link href="/timetable" className="block">
-                <Button className="w-full bg-[#F39C12] hover:bg-orange-600 text-white justify-start">
-                  <Clock className="w-4 h-4 mr-2" />
-                  Edit Timetable
-                </Button>
-              </Link>
-            </div>
-          </Card>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Principal Dashboard</h1>
+          <p className="text-slate-500">Welcome back, Principal. Here's what's happening at SchoolTime today.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" className="gap-2">
+            <Calendar className="w-4 h-4" />
+            March 22, 2026
+          </Button>
+          <Button className="bg-slate-900 gap-2" asChild>
+            <Link href="/dashboard/principal/timetable/generate">
+              <Clock className="w-4 h-4" />
+              Generate Timetable
+            </Link>
+          </Button>
         </div>
       </div>
 
-      {/* Organization & Administration */}
-      <div className="grid md:grid-cols-2 gap-6">
-        {/* Organization Creation */}
-        <Card className="p-6 border border-gray-200 rounded-2xl">
-          <h3 className="text-lg font-bold text-gray-900 mb-3">Organization Management</h3>
-          <p className="text-sm text-gray-600 mb-4">
-            Create or manage your school organization
-          </p>
-          <div className="space-y-3">
-            <Link href="/organizations" className="block">
-              <Button variant="outline" className="w-full justify-center">
-                Create Organization
-              </Button>
-            </Link>
-            <Link href="/organizations/manage" className="block">
-              <Button variant="outline" className="w-full justify-center">
-                Manage Organizations
-              </Button>
-            </Link>
-          </div>
-        </Card>
-
-        {/* Email Notification Logs */}
-        <Card className="p-6 border border-gray-200 rounded-2xl">
-          <h3 className="text-lg font-bold text-gray-900 mb-3">Email Notification Logs</h3>
-          <div className="space-y-3 mb-4">
-            <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-              <span className="text-sm text-gray-700">Total Sent</span>
-              <span className="font-semibold text-gray-900">324</span>
-            </div>
-            <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-              <span className="text-sm text-gray-700">Successful</span>
-              <span className="font-semibold text-[#27AE60]">318</span>
-            </div>
-            <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-              <span className="text-sm text-gray-700">Failed</span>
-              <span className="font-semibold text-[#E74C3C]">6</span>
-            </div>
-          </div>
-          <Link href="/dashboard/teacher/email-logs" className="block">
-            <Button variant="outline" className="w-full justify-center">
-              View Detailed Logs
-            </Button>
+      {/* KPI Cards */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {stats.map((stat) => (
+          <Link key={stat.title} href={stat.href}>
+            <Card className="hover:shadow-lg transition-all duration-300 border-slate-200 cursor-pointer group h-full">
+              <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+                <CardTitle className="text-sm font-medium text-slate-600">{stat.title}</CardTitle>
+                <div className={`${stat.color} p-2 rounded-lg text-white group-hover:scale-110 transition-transform`}>
+                  <stat.icon className="w-4 h-4" />
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="text-3xl font-bold text-slate-900">{stat.value}</div>
+                <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3 text-emerald-500" />
+                  {stat.description}
+                </p>
+              </CardContent>
+            </Card>
           </Link>
-        </Card>
+        ))}
       </div>
 
-      {/* Recent Activity */}
-      <Card className="p-6 border border-gray-200">
-        <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Activity</h2>
-        <div className="space-y-4">
-          {recentActivity.map((activity) => {
-            const Icon = activity.icon;
-            return (
-              <div
-                key={activity.id}
-                className="flex items-start gap-4 pb-4 border-b border-gray-200 last:border-b-0 last:pb-0"
-              >
-                <div className="flex-shrink-0 mt-1">
-                  <div className="flex items-center justify-center w-10 h-10 bg-[#E74C3C]/10 rounded-full">
-                    <Icon className="w-5 h-5 text-[#E74C3C]" />
+      <div className="grid gap-6 md:grid-cols-3">
+        {/* Today's Schedule - Left Column */}
+        <Card className="md:col-span-2 shadow-sm border-slate-200">
+          <CardHeader className="flex flex-row items-center justify-between">
+            <CardTitle className="text-xl font-bold">Today's Schedule</CardTitle>
+            <div className="flex gap-2">
+              <Button size="sm" className="bg-red-600 hover:bg-red-700" asChild>
+                <Link href="/dashboard/principal/timetable/generate">Generate Timetable</Link>
+              </Button>
+              <Button size="sm" variant="outline" asChild>
+                <Link href="/timetable">View Full Schedule</Link>
+              </Button>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {[
+              { title: "Morning Assembly & Period 3", time: "10:00 AM - 10:50 AM", location: "Main Hall", icon: Clock },
+              { title: "Lunch Break", time: "10:50 AM - 11:35 AM", location: "Cafeteria", icon: Coffee, isBreak: true },
+              { title: "Class 10-A Mathematics", time: "12:35 PM - 01:25 PM", location: "Room 101", icon: SchoolIcon },
+            ].map((event, i) => (
+              <div key={i} className="flex items-center justify-between p-4 rounded-xl border bg-slate-50/50 hover:bg-slate-50 transition-colors">
+                <div className="flex items-center gap-4">
+                  <div className={`p-3 rounded-xl ${event.isBreak ? 'bg-orange-100 text-orange-600' : 'bg-red-100 text-red-600'}`}>
+                    <event.icon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h4 className="font-bold text-slate-900">{event.title}</h4>
+                    <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">{event.location}</p>
                   </div>
                 </div>
-                <div className="flex-1">
-                  <p className="font-semibold text-gray-900">{activity.action}</p>
-                  <p className="text-sm text-gray-600">{activity.description}</p>
-                  <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                <div className="text-sm font-bold text-slate-800">
+                  {event.time}
                 </div>
               </div>
-            );
-          })}
-        </div>
-      </Card>
+            ))}
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions - Right Column */}
+        <Card className="shadow-sm border-slate-200">
+          <CardHeader>
+            <CardTitle className="text-xl font-bold">Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            <Button 
+              className="w-full h-12 justify-start bg-red-500 hover:bg-red-600 text-white font-bold gap-3" 
+              asChild
+            >
+              <Link href="/dashboard/principal/students">
+                <Users className="w-5 h-5" />
+                Manage Students
+              </Link>
+            </Button>
+            <Button 
+              className="w-full h-12 justify-start bg-emerald-500 hover:bg-emerald-600 text-white font-bold gap-3" 
+              asChild
+            >
+              <Link href="/dashboard/principal/teachers">
+                <BookOpen className="w-5 h-5" />
+                Manage Teachers
+              </Link>
+            </Button>
+            <Button 
+              className="w-full h-12 justify-start bg-orange-500 hover:bg-orange-600 text-white font-bold gap-3" 
+              asChild
+            >
+              <Link href="/timetable">
+                <Clock className="w-5 h-5" />
+                Edit Timetable
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

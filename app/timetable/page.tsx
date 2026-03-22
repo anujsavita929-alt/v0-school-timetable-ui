@@ -1,520 +1,353 @@
-'use client';
+"use client";
 
-import { Card } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-import { TimetableGrid } from '@/components/timetable/TimetableGrid';
-import { Download, Printer, Sparkles } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { GenerateTimetableModal } from '@/components/generate-timetable-modal';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { 
+  Download, 
+  RefreshCcw, 
+  Coffee,
+  Edit3,
+  User,
+  ChevronRight,
+  X,
+  Save,
+  Pencil
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
+import Link from "next/link";
 
-interface TimeSlot {
-  id: string;
-  day: string;
-  time: string;
+interface Session {
   subject: string;
   teacher: string;
   room: string;
-  color: string;
+  day: string;
+  period: number;
 }
 
-type WeekKey = 'current' | 'next' | 'previous';
+interface EditingCell {
+  classNum: string;
+  section: string;
+  day: string;
+  period: number;
+  subject: string;
+  teacher: string;
+  room: string;
+}
 
-export default function TimetablePage() {
-  const [selectedClass, setSelectedClass] = useState<'10-A' | '10-B' | '9-A' | '9-B' | '8-A'>('10-A');
-  const [selectedWeek, setSelectedWeek] = useState<WeekKey>('current');
-  const [slots, setSlots] = useState<TimeSlot[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [editData, setEditData] = useState<{
-    id?: string;
-    day: string;
-    time: string;
-    subject: string;
-    teacher: string;
-    room: string;
-  } | null>(null);
-  const [isSaving, setIsSaving] = useState(false);
-  const [subjectFilter, setSubjectFilter] = useState<string>('all');
-  const [teacherFilter, setTeacherFilter] = useState<string>('all');
-  const [dayFilter, setDayFilter] = useState<string>('all');
-  const [isGenerateModalOpen, setIsGenerateModalOpen] = useState(false);
-  const [userRole, setUserRole] = useState<string>('');
+export default function TimetableView() {
+  const [timetable, setTimetable] = useState<any>(null);
+  const [editing, setEditing] = useState<EditingCell | null>(null);
 
-  // Check user role on mount
+  const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+  const periods = [
+    { id: 0, time: "08:00 - 08:50" },
+    { id: 1, time: "09:00 - 09:50" },
+    { id: 2, time: "10:00 - 10:50" },
+    { id: "lunch", time: "10:50 - 11:35", isLunch: true },
+    { id: 3, time: "11:35 - 12:25" },
+    { id: 4, time: "12:35 - 13:25" },
+    { id: 5, time: "13:35 - 14:25" },
+    { id: 6, time: "14:35 - 15:25" },
+    { id: 7, time: "15:35 - 16:25" },
+  ];
+
+  const subjectOptions = ["Mathematics", "Physics", "Chemistry", "English", "History", "Computer Science", "Physical Education", "Art", "Music", "Self Study", "Biology", "Geography"];
+  const teacherOptions = ["Mr. Sharma", "Ms. Verma", "Dr. Gupta", "Mrs. Singh", "Mr. Ross", "Ms. Lee", "Mr. Wilson", "Mrs. Garcia", "N/A"];
+  const roomOptions = ["Room 101", "Room 102", "Room 103", "Lab 105", "Lab 201", "Lab 1", "Gym", "Studio", "Library", "Main Hall"];
+
   useEffect(() => {
-    // Mock role check - replace with actual auth
-    setUserRole('principal'); // Change this based on actual user session
-  }, []);
-
-  const fetchTimetable = async (classId: string, week: WeekKey) => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      const params = new URLSearchParams({ classId, week });
-      const res = await fetch(`/api/timetable?${params.toString()}`);
-      if (!res.ok) {
-        throw new Error('Failed to load timetable');
+    const mockGenerated = {
+      "10": {
+        "A": [
+          { day: "Monday", period: 0, subject: "Mathematics", teacher: "Mr. Sharma", room: "Room 101" },
+          { day: "Monday", period: 1, subject: "Physics", teacher: "Ms. Verma", room: "Lab 105" },
+          { day: "Monday", period: 2, subject: "Self Study", teacher: "N/A", room: "Library" },
+          { day: "Monday", period: 3, subject: "History", teacher: "Mr. Ross", room: "Room 101" },
+          { day: "Monday", period: 4, subject: "English", teacher: "Dr. Gupta", room: "Room 102" },
+          { day: "Tuesday", period: 0, subject: "English", teacher: "Dr. Gupta", room: "Room 101" },
+          { day: "Tuesday", period: 1, subject: "Chemistry", teacher: "Mrs. Singh", room: "Lab 201" },
+          { day: "Tuesday", period: 2, subject: "Mathematics", teacher: "Mr. Sharma", room: "Room 101" },
+          { day: "Tuesday", period: 3, subject: "Computer Science", teacher: "Ms. Lee", room: "Lab 1" },
+          { day: "Wednesday", period: 0, subject: "Computer Science", teacher: "Ms. Lee", room: "Lab 1" },
+          { day: "Wednesday", period: 1, subject: "Mathematics", teacher: "Mr. Sharma", room: "Room 101" },
+          { day: "Wednesday", period: 2, subject: "Physics", teacher: "Ms. Verma", room: "Lab 105" },
+          { day: "Wednesday", period: 3, subject: "English", teacher: "Dr. Gupta", room: "Room 101" },
+          { day: "Thursday", period: 0, subject: "Physical Education", teacher: "Mr. Wilson", room: "Gym" },
+          { day: "Thursday", period: 1, subject: "History", teacher: "Mr. Ross", room: "Room 103" },
+          { day: "Thursday", period: 2, subject: "Chemistry", teacher: "Mrs. Singh", room: "Lab 201" },
+          { day: "Thursday", period: 3, subject: "Self Study", teacher: "N/A", room: "Library" },
+          { day: "Friday", period: 0, subject: "Art", teacher: "Mrs. Garcia", room: "Studio" },
+          { day: "Friday", period: 1, subject: "Mathematics", teacher: "Mr. Sharma", room: "Room 101" },
+          { day: "Friday", period: 2, subject: "English", teacher: "Dr. Gupta", room: "Room 101" },
+          { day: "Friday", period: 3, subject: "Physics", teacher: "Ms. Verma", room: "Lab 105" },
+        ]
       }
-      const data = await res.json();
-      setSlots(data.slots ?? []);
-    } catch (err) {
-      console.error(err);
-      setError('Unable to load timetable. Please try again.');
-      setSlots([]);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    // Load initial timetable for default class/week
-    fetchTimetable(selectedClass, selectedWeek);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    };
+    setTimetable(mockGenerated);
   }, []);
 
-  const handleApplyFilters = () => {
-    fetchTimetable(selectedClass, selectedWeek);
-  };
-
-  const getWeekLabel = (week: WeekKey) => {
-    switch (week) {
-      case 'next':
-        return 'Next Week';
-      case 'previous':
-        return 'Previous Week';
-      default:
-        return 'Current Week';
+  const getSubjectColor = (subject: string) => {
+    if (subject === 'Self Study') return 'bg-slate-50 text-slate-400 border-slate-200';
+    const colors = [
+      'bg-red-50 text-red-700 border-red-200',
+      'bg-rose-50 text-rose-700 border-rose-200',
+      'bg-orange-50 text-orange-700 border-orange-200',
+      'bg-emerald-50 text-emerald-700 border-emerald-200',
+      'bg-sky-50 text-sky-700 border-sky-200',
+      'bg-violet-50 text-violet-700 border-violet-200',
+      'bg-amber-50 text-amber-700 border-amber-200',
+    ];
+    let hash = 0;
+    for (let i = 0; i < subject.length; i++) {
+      hash = subject.charCodeAt(i) + ((hash << 5) - hash);
     }
+    return colors[Math.abs(hash) % colors.length];
   };
 
-  const handleExport = () => {
-    if (!slots.length) return;
+  const getSession = (classNum: string, section: string, day: string, periodIdx: number) => {
+    return timetable?.[classNum]?.[section]?.find((s: any) => s.day === day && s.period === periodIdx);
+  };
 
-    const header = ['Day', 'Time', 'Subject', 'Teacher', 'Room'];
-    const rows = slots.map((slot) => [
-      slot.day,
-      slot.time,
-      slot.subject,
-      slot.teacher,
-      slot.room,
-    ]);
+  const handleCellClick = (classNum: string, section: string, day: string, period: number, session: any) => {
+    setEditing({
+      classNum, section, day, period,
+      subject: session?.subject || "",
+      teacher: session?.teacher || "",
+      room: session?.room || "",
+    });
+  };
 
-    const csvContent = [header, ...rows]
-      .map((cols) =>
-        cols
-          .map((value) => `"${String(value).replace(/"/g, '""')}"`)
-          .join(','),
-      )
-      .join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute(
-      'download',
-      `timetable-${selectedClass}-${selectedWeek}.csv`,
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+  const handleSave = () => {
+    if (!editing || !timetable) return;
+    const { classNum, section, day, period, subject, teacher, room } = editing;
+    
+    const updated = { ...timetable };
+    const sessions = [...(updated[classNum]?.[section] || [])];
+    const idx = sessions.findIndex((s: any) => s.day === day && s.period === period);
+    
+    if (subject.trim() === "") {
+      // Remove the session if subject is cleared
+      if (idx !== -1) sessions.splice(idx, 1);
+    } else if (idx !== -1) {
+      sessions[idx] = { ...sessions[idx], subject, teacher, room };
+    } else {
+      sessions.push({ day, period, subject, teacher, room });
+    }
+    
+    if (!updated[classNum]) updated[classNum] = {};
+    updated[classNum][section] = sessions;
+    setTimetable({ ...updated });
+    setEditing(null);
+    toast.success("Cell updated successfully!");
   };
 
   const handlePrint = () => {
-    if (typeof window === 'undefined') return;
     window.print();
   };
 
-  const filteredSlots = slots.filter((slot) => {
-    const matchesSubject =
-      subjectFilter === 'all' || slot.subject === subjectFilter;
-    const matchesTeacher =
-      teacherFilter === 'all' || slot.teacher === teacherFilter;
-    const matchesDay = dayFilter === 'all' || slot.day === dayFilter;
-    return matchesSubject && matchesTeacher && matchesDay;
-  });
-
-  const uniqueSubjects = Array.from(new Set(slots.map((s) => s.subject)));
-  const uniqueTeachers = Array.from(new Set(slots.map((s) => s.teacher)));
-  const uniqueDays = Array.from(new Set(slots.map((s) => s.day)));
-
-  const openEditDialog = (params: {
-    day: string;
-    time: string;
-    slot: TimeSlot | null;
-  }) => {
-    const { day, time, slot } = params;
-    if (slot) {
-      setEditData({
-        id: slot.id,
-        day: slot.day,
-        time: slot.time,
-        subject: slot.subject,
-        teacher: slot.teacher,
-        room: slot.room,
-      });
-    } else {
-      setEditData({
-        day,
-        time,
-        subject: '',
-        teacher: '',
-        room: '',
-      });
-    }
-  };
-
-  const handleSaveEdit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editData) return;
-
-    try {
-      setIsSaving(true);
-      const res = await fetch('/api/timetable', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          classId: selectedClass,
-          week: selectedWeek,
-          slotId: editData.id,
-          day: editData.day,
-          time: editData.time,
-          subject: editData.subject,
-          teacher: editData.teacher,
-          room: editData.room,
-        }),
-      });
-      if (!res.ok) {
-        throw new Error('Failed to save timetable entry');
-      }
-      const data = await res.json();
-      setSlots(data.slots ?? []);
-      setEditData(null);
-      toast.success('Timetable entry saved successfully');
-    } catch (err) {
-      console.error(err);
-      setError('Unable to save changes. Please try again.');
-      toast.error('Failed to save timetable entry');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  const handleGenerateSuccess = () => {
-    setIsGenerateModalOpen(false);
-    toast.success('Timetable generated successfully');
-    fetchTimetable(selectedClass, selectedWeek);
-  };
-
-  const handleGenerateError = (error: string) => {
-    toast.error(error);
-  };
-
   return (
-    <div className="p-4 md:p-8 space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div className="p-6 space-y-8 animate-in fade-in duration-700">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 print:hidden">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Timetable</h1>
-          <p className="text-gray-600 mt-2 text-sm md:text-base">
-            View and manage schedules for{' '}
-            <span className="font-semibold text-gray-900">
-              Class {selectedClass}
-            </span>{' '}
-            ({getWeekLabel(selectedWeek)})
-          </p>
+          <div className="flex items-center gap-2 text-slate-500 mb-1">
+            <Link href="/dashboard/principal" className="hover:text-slate-900 transition-colors">Dashboard</Link>
+            <ChevronRight className="w-3 h-3" />
+            <span className="font-medium text-slate-900">Edit Timetable</span>
+          </div>
+          <h1 className="text-3xl font-black text-slate-900 uppercase">Edit Timetable</h1>
+          <p className="text-slate-500 font-medium">Click any cell to edit. Empty cells can be filled with new subjects.</p>
         </div>
-
-        <div className="flex gap-2">
-          {userRole === 'principal' && (
-            <Button
-              onClick={() => setIsGenerateModalOpen(true)}
-              className="gap-2 bg-[#E74C3C] hover:bg-red-700 text-white"
-            >
-              <Sparkles className="w-4 h-4" />
-              <span className="hidden md:inline">Generate Timetable</span>
-            </Button>
-          )}
-          <Button
-            variant="outline"
-            className="gap-2 text-sm md:text-base"
-            onClick={handleExport}
-            disabled={!slots.length}
-          >
-            <Download className="w-4 h-4" />
-            <span className="hidden md:inline">Export</span>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" className="gap-2" onClick={() => toast.info("Refreshing schedule...")}>
+            <RefreshCcw className="w-4 h-4" />
+            Regenerate
           </Button>
-          <Button
-            variant="outline"
-            className="gap-2 text-sm md:text-base"
-            onClick={handlePrint}
-            disabled={!slots.length}
-          >
-            <Printer className="w-4 h-4" />
-            <span className="hidden md:inline">Print</span>
+          <Button className="bg-slate-900 gap-2" onClick={handlePrint}>
+            <Download className="w-4 h-4" />
+            Download PDF
           </Button>
         </div>
       </div>
 
-      {/* Filters */}
-      <Card className="p-6 border border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              Select Class
-            </label>
-            <Select value={selectedClass} onValueChange={setSelectedClass}>
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="10-A">Class 10-A</SelectItem>
-                <SelectItem value="10-B">Class 10-B</SelectItem>
-                <SelectItem value="9-A">Class 9-A</SelectItem>
-                <SelectItem value="9-B">Class 9-B</SelectItem>
-                <SelectItem value="8-A">Class 8-A</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              Week
-            </label>
-            <Select
-              value={selectedWeek}
-              onValueChange={(value: WeekKey) => setSelectedWeek(value)}
-            >
-              <SelectTrigger className="w-full">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="current">Current Week</SelectItem>
-                <SelectItem value="next">Next Week</SelectItem>
-                <SelectItem value="previous">Previous Week</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="flex items-end">
-            <Button
-              className="w-full bg-[#E74C3C] hover:bg-red-700 text-white"
-              onClick={handleApplyFilters}
-              disabled={isLoading}
-            >
-              {isLoading ? 'Loading...' : 'Apply Filters'}
-            </Button>
-          </div>
-        </div>
-      </Card>
-
-      {/* Additional Filters */}
-      <Card className="p-6 border border-gray-200">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              Subject
-            </label>
-            <select
-              value={subjectFilter}
-              onChange={(e) => setSubjectFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent"
-            >
-              <option value="all">All Subjects</option>
-              {uniqueSubjects.map((subject) => (
-                <option key={subject} value={subject}>
-                  {subject}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              Teacher
-            </label>
-            <select
-              value={teacherFilter}
-              onChange={(e) => setTeacherFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent"
-            >
-              <option value="all">All Teachers</option>
-              {uniqueTeachers.map((teacher) => (
-                <option key={teacher} value={teacher}>
-                  {teacher}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-900 mb-2">
-              Day
-            </label>
-            <select
-              value={dayFilter}
-              onChange={(e) => setDayFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent"
-            >
-              <option value="all">All Days</option>
-              {uniqueDays.map((day) => (
-                <option key={day} value={day}>
-                  {day}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-      </Card>
-
-      {/* Timetable Grid */}
-      <Card className="p-6 border border-gray-200 overflow-hidden">
-        {error ? (
-          <p className="text-sm text-red-600">{error}</p>
-        ) : (
-          <TimetableGrid
-            slots={filteredSlots}
-            onCellClick={openEditDialog}
-          />
-        )}
-      </Card>
-
-      {/* Legend */}
-      <Card className="p-6 border border-gray-200">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Subject Color Legend</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#E74C3C' }}></div>
-            <span className="text-gray-700">Mathematics</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#27AE60' }}></div>
-            <span className="text-gray-700">English</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#F39C12' }}></div>
-            <span className="text-gray-700">Science</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="w-4 h-4 rounded" style={{ backgroundColor: '#E83E8C' }}></div>
-            <span className="text-gray-700">Others</span>
-          </div>
-        </div>
-      </Card>
-
-      {/* Edit Dialog (simple inline card overlay) */}
-      {editData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-xl shadow-xl w-full max-w-lg p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              {editData.id ? 'Edit Timetable Entry' : 'Add Timetable Entry'}
-            </h2>
-            <form onSubmit={handleSaveEdit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-1">
-                    Day
-                  </label>
-                  <input
-                    type="text"
-                    value={editData.day}
-                    onChange={(e) =>
-                      setEditData({ ...editData, day: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-900 mb-1">
-                    Time
-                  </label>
-                  <input
-                    type="text"
-                    value={editData.time}
-                    onChange={(e) =>
-                      setEditData({ ...editData, time: e.target.value })
-                    }
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent"
-                  />
-                </div>
-              </div>
+      {/* Edit Modal */}
+      {editing && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setEditing(null)}>
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-5" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-1">
-                  Subject
-                </label>
-                <input
-                  type="text"
-                  value={editData.subject}
-                  onChange={(e) =>
-                    setEditData({ ...editData, subject: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent"
-                  required
-                />
+                <h3 className="text-lg font-black text-slate-900">Edit Cell</h3>
+                <p className="text-xs text-slate-500 font-medium">{editing.day} • Period {editing.period + 1}</p>
               </div>
+              <button onClick={() => setEditing(null)} className="p-2 hover:bg-slate-100 rounded-full transition">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-900 mb-1">
-                  Teacher
-                </label>
-                <input
-                  type="text"
-                  value={editData.teacher}
-                  onChange={(e) =>
-                    setEditData({ ...editData, teacher: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-900 mb-1">
-                  Room
-                </label>
-                <input
-                  type="text"
-                  value={editData.room}
-                  onChange={(e) =>
-                    setEditData({ ...editData, room: e.target.value })
-                  }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#E74C3C] focus:border-transparent"
-                  required
-                />
-              </div>
-              <div className="flex justify-end gap-3 pt-2">
-                <button
-                  type="button"
-                  onClick={() => setEditData(null)}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                <Label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Subject</Label>
+                <select 
+                  className="w-full mt-1 border rounded-lg px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+                  value={editing.subject}
+                  onChange={e => setEditing({...editing, subject: e.target.value})}
                 >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSaving}
-                  className="px-4 py-2 text-sm font-medium text-white bg-[#E74C3C] hover:bg-red-700 rounded-lg disabled:opacity-70"
-                >
-                  {isSaving ? 'Saving...' : 'Save'}
-                </button>
+                  <option value="">-- Clear / Remove --</option>
+                  {subjectOptions.map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
               </div>
-            </form>
+              <div>
+                <Label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Teacher</Label>
+                <select 
+                  className="w-full mt-1 border rounded-lg px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+                  value={editing.teacher}
+                  onChange={e => setEditing({...editing, teacher: e.target.value})}
+                >
+                  <option value="">Select Teacher</option>
+                  {teacherOptions.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+              </div>
+              <div>
+                <Label className="text-xs font-bold text-slate-600 uppercase tracking-wide">Room</Label>
+                <select 
+                  className="w-full mt-1 border rounded-lg px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-red-500 focus:border-red-500 outline-none"
+                  value={editing.room}
+                  onChange={e => setEditing({...editing, room: e.target.value})}
+                >
+                  <option value="">Select Room</option>
+                  {roomOptions.map(r => <option key={r} value={r}>{r}</option>)}
+                </select>
+              </div>
+            </div>
+
+            <div className="flex gap-3 pt-2">
+              <Button variant="outline" className="flex-1" onClick={() => setEditing(null)}>Cancel</Button>
+              <Button className="flex-1 bg-red-600 hover:bg-red-700 gap-2" onClick={handleSave}>
+                <Save className="w-4 h-4" />
+                Save Changes
+              </Button>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Generate Timetable Modal */}
-      <GenerateTimetableModal
-        isOpen={isGenerateModalOpen}
-        onClose={() => setIsGenerateModalOpen(false)}
-        onSuccess={handleGenerateSuccess}
-        onError={handleGenerateError}
-      />
+      <div className="space-y-12">
+        {timetable && Object.keys(timetable).map(classNum => (
+          Object.keys(timetable[classNum]).map(section => (
+            <Card key={`${classNum}-${section}`} className="border-slate-200 shadow-xl overflow-hidden break-after-page">
+              <CardHeader className="bg-slate-900 text-white p-6 border-b-4 border-red-500">
+                <div className="flex justify-between items-center">
+                  <div className="space-y-1">
+                    <CardTitle className="text-3xl font-black tracking-tight">CLASS {classNum}-{section}</CardTitle>
+                    <CardDescription className="text-red-200 font-bold uppercase tracking-widest text-[10px]">
+                      Academic Session 2025-26 • Click any cell to edit
+                    </CardDescription>
+                  </div>
+                  <div className="text-right hidden sm:block">
+                    <Badge className="bg-white/10 text-white border-white/20 gap-1">
+                      <Pencil className="w-3 h-3" />
+                      Editable Mode
+                    </Badge>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-0">
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse">
+                    <thead>
+                      <tr className="bg-slate-50 border-b border-slate-200">
+                        <th className="p-4 border-r border-slate-200 text-slate-400 font-black text-[10px] uppercase tracking-widest w-32">Period / Time</th>
+                        {days.map(day => (
+                          <th key={day} className="p-4 border-r border-slate-200 font-black text-slate-900 uppercase tracking-tight">
+                            {day}
+                          </th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {periods.map((p, pIdx) => (
+                        <tr key={p.id} className={`border-b border-slate-100 ${p.isLunch ? 'bg-orange-50/50' : ''}`}>
+                          <td className="p-4 border-r border-slate-200 bg-slate-50/30">
+                            <div className="flex flex-col items-center justify-center text-center">
+                              {p.isLunch ? (
+                                <Coffee className="w-4 h-4 text-orange-400 mb-1" />
+                              ) : (
+                                <span className="text-xs font-black text-slate-400 mb-1">P{pIdx > 3 ? pIdx : pIdx + 1}</span>
+                              )}
+                              <span className="text-[10px] font-bold text-slate-600 whitespace-nowrap">{p.time}</span>
+                            </div>
+                          </td>
+                          
+                          {p.isLunch ? (
+                            <td colSpan={5} className="p-4 text-center">
+                              <div className="flex items-center justify-center gap-3 text-red-600/60 font-black uppercase tracking-[0.4em] text-[10px] py-1 bg-red-50/30 rounded-full mx-4 border border-red-100/50">
+                                <Coffee className="w-3.5 h-3.5" />
+                                LUNCH BREAK (45 MINS)
+                                <Coffee className="w-3.5 h-3.5" />
+                              </div>
+                            </td>
+                          ) : (
+                            days.map(day => {
+                              const periodId = typeof p.id === 'number' ? p.id : -1;
+                              const session = getSession(classNum, section, day, periodId);
+                              return (
+                                <td 
+                                  key={`${day}-${p.id}`} 
+                                  className="p-2 border-r border-slate-100 group min-w-[160px] cursor-pointer"
+                                  onClick={() => handleCellClick(classNum, section, day, periodId, session)}
+                                >
+                                  {session ? (
+                                    <div className={`p-3 rounded-xl border shadow-sm transition-all hover:shadow-md hover:scale-[1.02] relative group/card ${getSubjectColor(session.subject)}`}>
+                                      <div className="flex justify-between items-start mb-1.5">
+                                        <span className="text-[9px] font-black uppercase tracking-wider opacity-70">{session.room}</span>
+                                        <Edit3 className="w-3 h-3 opacity-0 group-hover/card:opacity-100 cursor-pointer transition-opacity" />
+                                      </div>
+                                      <h4 className="text-sm font-black leading-tight mb-1 truncate">{session.subject}</h4>
+                                      <div className="flex items-center gap-1 opacity-70">
+                                        <User className="w-3 h-3" />
+                                        <p className="text-[10px] font-bold uppercase tracking-tight truncate">
+                                          {session.teacher}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ) : (
+                                    <div className="h-full flex flex-col items-center justify-center min-h-[90px] bg-slate-50/20 rounded-xl border-2 border-dashed border-slate-200/60 text-slate-300 transition-all hover:bg-red-50/30 hover:border-red-300 hover:text-red-400">
+                                      <Pencil className="w-4 h-4 mb-1 opacity-0 group-hover:opacity-100 transition-opacity" />
+                                      <span className="text-[9px] font-bold tracking-[0.2em] uppercase">Click to Add</span>
+                                    </div>
+                                  )}
+                                </td>
+                              );
+                            })
+                          )}
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </CardContent>
+            </Card>
+          ))
+        ))}
+      </div>
+
+      <style jsx global>{`
+        @media print {
+          .print\\:hidden {
+            display: none !important;
+          }
+          body {
+            background: white !important;
+            padding: 0 !important;
+          }
+          .break-after-page {
+            page-break-after: always;
+          }
+        }
+      `}</style>
     </div>
   );
 }
