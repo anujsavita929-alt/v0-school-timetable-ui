@@ -1,20 +1,16 @@
-// lib/prisma.ts
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@prisma/client'
+import { PrismaLibSql } from '@prisma/adapter-libsql'
 
-const prismaClientSingleton = () => {
-  return new PrismaClient();
-  // If you get engine validation error later, try:
-  // return new PrismaClient({ __internal: { engineType: 'library' } });
-};
+declare global {
+  // eslint-disable-next-line no-var
+  var prisma: PrismaClient | undefined
+}
 
-type PrismaSingleton = ReturnType<typeof prismaClientSingleton>;
+const adapter = new PrismaLibSql({ url: process.env.DATABASE_URL || "file:./dev.db" })
 
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaSingleton | undefined;
-};
+export const prisma = global.prisma ?? new PrismaClient({
+  adapter,
+  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+})
 
-const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
-
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
-
-export { prisma };
+if (process.env.NODE_ENV !== 'production') global.prisma = prisma

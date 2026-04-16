@@ -1,237 +1,165 @@
 import { NextResponse } from 'next/server';
+import { prisma } from '@/lib/prisma';
 
-type WeekKey = 'current' | 'next' | 'previous';
-
-export interface TimeSlot {
+type TimetableSlot = {
   id: string;
   day: string;
-  time: string;
+  period: number;
   subject: string;
   teacher: string;
   room: string;
-}
-
-type ClassKey = '10-A' | '10-B' | '9-A' | '9-B' | '8-A';
-
-type TimetableStore = Record<ClassKey, Record<WeekKey, TimeSlot[]>>;
-
-const baseWeek: TimeSlot[] = [
-  // Monday
-  { id: '1', day: 'Monday', time: '08:00 AM', subject: 'Mathematics', teacher: 'Mr. Smith', room: '101' },
-  { id: '2', day: 'Monday', time: '09:00 AM', subject: 'English', teacher: 'Ms. Johnson', room: '102' },
-  { id: '3', day: 'Monday', time: '10:00 AM', subject: 'Science', teacher: 'Dr. Brown', room: '103' },
-  { id: '4', day: 'Monday', time: '11:00 AM', subject: 'History', teacher: 'Mr. Davis', room: '104' },
-  { id: '5', day: 'Monday', time: '12:00 PM', subject: 'Physical Education', teacher: 'Mr. Wilson', room: 'Gym' },
-
-  // Tuesday
-  { id: '6', day: 'Tuesday', time: '08:00 AM', subject: 'English', teacher: 'Ms. Johnson', room: '102' },
-  { id: '7', day: 'Tuesday', time: '09:00 AM', subject: 'Science', teacher: 'Dr. Brown', room: '103' },
-  { id: '8', day: 'Tuesday', time: '10:00 AM', subject: 'Mathematics', teacher: 'Mr. Smith', room: '101' },
-  { id: '9', day: 'Tuesday', time: '11:00 AM', subject: 'Computer Science', teacher: 'Ms. Lee', room: '105' },
-  { id: '10', day: 'Tuesday', time: '12:00 PM', subject: 'Art', teacher: 'Mrs. Garcia', room: '106' },
-
-  // Wednesday
-  { id: '11', day: 'Wednesday', time: '08:00 AM', subject: 'Science', teacher: 'Dr. Brown', room: '103' },
-  { id: '12', day: 'Wednesday', time: '09:00 AM', subject: 'Mathematics', teacher: 'Mr. Smith', room: '101' },
-  { id: '13', day: 'Wednesday', time: '10:00 AM', subject: 'History', teacher: 'Mr. Davis', room: '104' },
-  { id: '14', day: 'Wednesday', time: '11:00 AM', subject: 'Physical Education', teacher: 'Mr. Wilson', room: 'Gym' },
-  { id: '15', day: 'Wednesday', time: '12:00 PM', subject: 'Music', teacher: 'Ms. Martinez', room: '107' },
-
-  // Thursday
-  { id: '16', day: 'Thursday', time: '08:00 AM', subject: 'Computer Science', teacher: 'Ms. Lee', room: '105' },
-  { id: '17', day: 'Thursday', time: '09:00 AM', subject: 'English', teacher: 'Ms. Johnson', room: '102' },
-  { id: '18', day: 'Thursday', time: '10:00 AM', subject: 'Mathematics', teacher: 'Mr. Smith', room: '101' },
-  { id: '19', day: 'Thursday', time: '11:00 AM', subject: 'Science', teacher: 'Dr. Brown', room: '103' },
-  { id: '20', day: 'Thursday', time: '12:00 PM', subject: 'History', teacher: 'Mr. Davis', room: '104' },
-
-  // Friday
-  { id: '21', day: 'Friday', time: '08:00 AM', subject: 'Art', teacher: 'Mrs. Garcia', room: '106' },
-  { id: '22', day: 'Friday', time: '09:00 AM', subject: 'Music', teacher: 'Ms. Martinez', room: '107' },
-  { id: '23', day: 'Friday', time: '10:00 AM', subject: 'Physical Education', teacher: 'Mr. Wilson', room: 'Gym' },
-  { id: '24', day: 'Friday', time: '11:00 AM', subject: 'Computer Science', teacher: 'Ms. Lee', room: '105' },
-  { id: '25', day: 'Friday', time: '12:00 PM', subject: 'Assembly', teacher: 'Principal', room: 'Main Hall' },
-];
-
-let timetableStore: TimetableStore = {
-  '10-A': {
-    current: baseWeek,
-    next: baseWeek.map((slot) => ({
-      ...slot,
-      id: `n-${slot.id}`,
-      subject: slot.subject === 'Mathematics' ? 'Revision - Mathematics' : slot.subject,
-    })),
-    previous: baseWeek.map((slot) => ({
-      ...slot,
-      id: `p-${slot.id}`,
-      subject: slot.subject === 'Mathematics' ? 'Term Test - Mathematics' : slot.subject,
-    })),
-  },
-  '10-B': {
-    current: baseWeek.map((slot) => ({
-      ...slot,
-      id: `10b-${slot.id}`,
-      teacher: slot.teacher.replace('Mr. Smith', 'Mr. Kumar'),
-    })),
-    next: baseWeek.map((slot) => ({
-      ...slot,
-      id: `10b-n-${slot.id}`,
-      teacher: slot.teacher.replace('Mr. Smith', 'Mr. Kumar'),
-    })),
-    previous: baseWeek.map((slot) => ({
-      ...slot,
-      id: `10b-p-${slot.id}`,
-      teacher: slot.teacher.replace('Mr. Smith', 'Mr. Kumar'),
-    })),
-  },
-  '9-A': {
-    current: baseWeek.map((slot) => ({
-      ...slot,
-      id: `9a-${slot.id}`,
-      subject: slot.subject === 'Science' ? 'General Science' : slot.subject,
-    })),
-    next: baseWeek.map((slot) => ({
-      ...slot,
-      id: `9a-n-${slot.id}`,
-      subject: slot.subject === 'Science' ? 'General Science' : slot.subject,
-    })),
-    previous: baseWeek.map((slot) => ({
-      ...slot,
-      id: `9a-p-${slot.id}`,
-      subject: slot.subject === 'Science' ? 'General Science' : slot.subject,
-    })),
-  },
-  '9-B': {
-    current: baseWeek.map((slot, idx) => ({
-      ...slot,
-      id: `9b-${slot.id}`,
-      room: slot.room === '101' ? '201' : slot.room,
-    })),
-    next: baseWeek.map((slot, idx) => ({
-      ...slot,
-      id: `9b-n-${slot.id}`,
-      room: slot.room === '101' ? '201' : slot.room,
-    })),
-    previous: baseWeek.map((slot, idx) => ({
-      ...slot,
-      id: `9b-p-${slot.id}`,
-      room: slot.room === '101' ? '201' : slot.room,
-    })),
-  },
-  '8-A': {
-    current: baseWeek.map((slot) => ({
-      ...slot,
-      id: `8a-${slot.id}`,
-      subject: slot.subject === 'Computer Science' ? 'Robotics' : slot.subject,
-    })),
-    next: baseWeek.map((slot) => ({
-      ...slot,
-      id: `8a-n-${slot.id}`,
-      subject: slot.subject === 'Computer Science' ? 'Robotics' : slot.subject,
-    })),
-    previous: baseWeek.map((slot) => ({
-      ...slot,
-      id: `8a-p-${slot.id}`,
-      subject: slot.subject === 'Computer Science' ? 'Robotics' : slot.subject,
-    })),
-  },
 };
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const classId = (searchParams.get('classId') ?? '10-A') as ClassKey;
-  const week = (searchParams.get('week') ?? 'current') as WeekKey;
+type TimetableData = Record<string, Record<string, TimetableSlot[]>>;
 
-  const classTimetable = timetableStore[classId];
+const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const TIME_TO_PERIOD_INDEX: Record<string, number> = {
+  '08:00': 0,
+  '09:00': 1,
+  '10:00': 2,
+  '11:35': 3,
+  '12:35': 4,
+  '13:35': 5,
+  '14:35': 6,
+  '15:35': 7,
+};
 
-  if (!classTimetable) {
-    return NextResponse.json(
-      { error: 'Class not found' },
-      { status: 404 },
-    );
-  }
-
-  const weekTimetable = classTimetable[week];
-
-  return NextResponse.json({
-    classId,
-    week,
-    slots: weekTimetable,
-  });
+function parseClassGroupName(classGroupName: string) {
+  const parts = classGroupName.split('-');
+  return {
+    classNum: parts[0] ?? classGroupName,
+    section: parts[1] ?? 'A',
+  };
 }
 
-// PATCH /api/timetable
-// Body: { classId, week, slotId?, day, time, subject, teacher, room }
-// If slotId exists, update matching slot; otherwise create a new one.
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const classId = searchParams.get('classId') ?? undefined;
+
+    const entries = await prisma.timetableEntry.findMany({
+      where: classId
+        ? {
+            classGroup: {
+              name: classId,
+            },
+          }
+        : undefined,
+      include: {
+        classGroup: true,
+        teacher: true,
+        subject: true,
+        periodSlot: true,
+      },
+      orderBy: [
+        { classGroup: { name: 'asc' } },
+        { periodSlot: { dayOfWeek: 'asc' } },
+        { periodSlot: { startTime: 'asc' } },
+      ],
+    });
+
+    const timetable: TimetableData = {};
+    for (const entry of entries) {
+      const { classNum, section } = parseClassGroupName(entry.classGroup.name);
+      const day = DAY_NAMES[entry.periodSlot.dayOfWeek] ?? entry.periodSlot.dayOfWeek.toString();
+      const period = TIME_TO_PERIOD_INDEX[entry.periodSlot.startTime] ?? 0;
+      const slot: TimetableSlot = {
+        id: entry.id,
+        day,
+        period,
+        subject: entry.subject?.name ?? 'TBD',
+        teacher: entry.teacher?.name ?? 'TBD',
+        room: entry.room ?? 'Room 101',
+      };
+
+      timetable[classNum] = timetable[classNum] ?? {};
+      timetable[classNum][section] = timetable[classNum][section] ?? [];
+      timetable[classNum][section].push(slot);
+    }
+
+    return NextResponse.json(timetable);
+  } catch (error) {
+    console.error('Failed to fetch timetable:', error);
+    return NextResponse.json({ error: 'Failed to fetch timetable' }, { status: 500 });
+  }
+}
+
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
-    const classId = (body.classId ?? '10-A') as ClassKey;
-    const week = (body.week ?? 'current') as WeekKey;
+    const classId = body.classId as string;
+    const day = body.day as string;
+    const time = body.time as string;
+    const subjectName = body.subject as string;
+    const teacherName = body.teacher as string;
+    const room = body.room as string;
+    const slotId = body.slotId as string | undefined;
 
-    if (!timetableStore[classId]) {
-      return NextResponse.json({ error: 'Class not found' }, { status: 404 });
-    }
-
-    const { slotId, day, time, subject, teacher, room } = body as {
-      slotId?: string;
-      day: string;
-      time: string;
-      subject: string;
-      teacher: string;
-      room: string;
-    };
-
-    if (!day || !time || !subject || !teacher || !room) {
+    if (!classId || !day || !time || !subjectName || !teacherName || !room) {
       return NextResponse.json(
-        { error: 'day, time, subject, teacher and room are required' },
+        { error: 'classId, day, time, subject, teacher and room are required' },
         { status: 400 },
       );
     }
 
-    const currentSlots = timetableStore[classId][week] ?? [];
-    let updatedSlots: TimeSlot[];
-
-    if (slotId) {
-      // Update existing
-      updatedSlots = currentSlots.map((slot) =>
-        slot.id === slotId
-          ? { ...slot, day, time, subject, teacher, room }
-          : slot,
-      );
-    } else {
-      // Create new
-      const newSlot: TimeSlot = {
-        id: `custom-${Date.now()}`,
-        day,
-        time,
-        subject,
-        teacher,
-        room,
-      };
-      updatedSlots = [...currentSlots, newSlot];
+    const classGroup = await prisma.classGroup.findFirst({
+      where: { name: classId },
+    });
+    if (!classGroup) {
+      return NextResponse.json({ error: 'Class group not found' }, { status: 404 });
     }
 
-    timetableStore = {
-      ...timetableStore,
-      [classId]: {
-        ...timetableStore[classId],
-        [week]: updatedSlots,
+    const periodSlot = await prisma.periodSlot.findFirst({
+      where: {
+        organizationId: classGroup.organizationId,
+        dayOfWeek: Object.keys(DAY_NAMES).find((index) => DAY_NAMES[Number(index)] === day)
+          ? Number(Object.keys(DAY_NAMES).find((index) => DAY_NAMES[Number(index)] === day))
+          : undefined,
+        startTime: time,
       },
-    };
+    });
+    if (!periodSlot) {
+      return NextResponse.json({ error: 'Period slot not found' }, { status: 404 });
+    }
 
-    return NextResponse.json(
-      {
-        classId,
-        week,
-        slots: updatedSlots,
+    const teacher = await prisma.teacher.findFirst({
+      where: {
+        organizationId: classGroup.organizationId,
+        name: teacherName,
       },
-      { status: 200 },
-    );
+    });
+
+    const subject = await prisma.subject.findFirst({
+      where: {
+        organizationId: classGroup.organizationId,
+        name: subjectName,
+      },
+    });
+
+    const updatedEntry = slotId
+      ? await prisma.timetableEntry.updateMany({
+          where: { id: slotId, classGroupId: classGroup.id },
+          data: {
+            teacherId: teacher?.id ?? undefined,
+            subjectId: subject?.id ?? undefined,
+            room,
+          },
+        })
+      : await prisma.timetableEntry.create({
+          data: {
+            organizationId: classGroup.organizationId,
+            classGroupId: classGroup.id,
+            periodSlotId: periodSlot.id,
+            teacherId: teacher?.id ?? undefined,
+            subjectId: subject?.id ?? undefined,
+            room,
+          },
+        });
+
+    return NextResponse.json({ success: true, entry: updatedEntry });
   } catch (error) {
-    return NextResponse.json(
-      { error: 'Failed to update timetable' },
-      { status: 500 },
-    );
+    console.error('Failed to update timetable:', error);
+    return NextResponse.json({ error: 'Failed to update timetable' }, { status: 500 });
   }
 }
 

@@ -187,13 +187,25 @@ export default function TimetableGenerator() {
   const handleGenerate = async () => {
     setIsLoading(true);
     toast.info("Generating optimized clash-free timetable...");
-    
+
     try {
-      // Simulate API delay for generation
-      await new Promise(r => setTimeout(r, 2500));
+      const response = await fetch('/api/generate-timetable', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ classes, week: 'current' }),
+      });
+
+      const result = await response.json();
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to generate timetable');
+      }
+
       toast.success("Timetable generated successfully!");
       router.push("/timetable");
-    } catch (e) {
+    } catch (error) {
+      console.error(error);
       toast.error("Failed to generate timetable. Please check constraints.");
     } finally {
       setIsLoading(false);

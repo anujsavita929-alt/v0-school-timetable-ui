@@ -16,9 +16,9 @@ type Organization = {
 declare const organizations: Organization[];
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 }
 
 // PATCH /api/organizations/[id]
@@ -26,7 +26,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
   const body = await request.json();
   const { name, code, email, phone, address } = body as Partial<Organization>;
 
-  const index = organizations.findIndex((org) => org.id === params.id);
+  const resolvedParams = await params;
+  const index = organizations.findIndex((org) => org.id === resolvedParams.id);
   if (index === -1) {
     return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
   }
@@ -47,7 +48,8 @@ export async function PATCH(request: NextRequest, { params }: RouteParams) {
 
 // DELETE /api/organizations/[id]
 export async function DELETE(_request: NextRequest, { params }: RouteParams) {
-  const index = organizations.findIndex((org) => org.id === params.id);
+  const resolvedParams = await params;
+  const index = organizations.findIndex((org) => org.id === resolvedParams.id);
   if (index === -1) {
     return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
   }
