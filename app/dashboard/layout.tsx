@@ -4,6 +4,8 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Navbar } from '@/components/layout/Navbar';
 import { MobileBottomNav } from '@/components/layout/MobileBottomNav';
 import { usePathname } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { sessionStorage, type UserSession } from '@/lib/session';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -20,6 +22,17 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   };
 
   const role = getRole() as 'principal' | 'teacher' | 'student';
+
+  const [session, setSession] = useState<UserSession | null>(null);
+
+  useEffect(() => {
+    setSession(sessionStorage.get());
+  }, []);
+
+  const userName = session?.name || 'Loading...';
+  const userInitials = session?.name 
+    ? session.name.split(' ').map(n => n.charAt(0)).join('').toUpperCase().substring(0, 2)
+    : '??';
 
   const getRoleDisplayName = () => {
     switch (role) {
@@ -39,11 +52,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden md:pb-0 pb-20">
-        {/* Navbar */}
         <Navbar 
-          userName="John Doe"
+          userName={session ? userName : 'Loading...'}
           userRole={getRoleDisplayName()}
-          userInitials="JD"
+          userInitials={session ? userInitials : '--'}
         />
 
         {/* Page Content */}

@@ -80,7 +80,7 @@ export default function LoginPage() {
       sessionStorage.set({
         id: 'demo-user',
         role: role as 'principal' | 'teacher' | 'student',
-        name: 'Demo User',
+        name: email.split('@')[0].split(/[._-]/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
         email,
       });
       router.push(`/dashboard/${role}`);
