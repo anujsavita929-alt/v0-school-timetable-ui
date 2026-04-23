@@ -214,13 +214,13 @@ export default function TimetableGenerator() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-8 animate-in slide-in-from-bottom-4 duration-500">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b dark:border-[#222] pb-6">
         <div>
-          <h1 className="text-4xl font-black tracking-tight text-slate-900 uppercase">Configuration</h1>
-          <p className="text-slate-500 font-medium">Define your school structure and subject priorities for the AI engine.</p>
+          <h1 className="text-4xl font-black tracking-tight text-slate-900 dark:text-gray-100 uppercase">Configuration</h1>
+          <p className="text-slate-500 dark:text-gray-400 font-medium">Define your school structure and subject priorities for the AI engine.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2" onClick={addClass}>
+          <Button variant="outline" className="gap-2 dark:border-[#333] dark:text-gray-300" onClick={addClass}>
             <Plus className="w-4 h-4" />
             Add New Class
           </Button>
@@ -230,7 +230,7 @@ export default function TimetableGenerator() {
       <div className="space-y-10">
         {classes.map((cls) => (
           <div key={cls.id} className="space-y-6">
-            <div className="flex items-center justify-between bg-slate-900 text-white p-4 rounded-2xl shadow-lg">
+            <div className="flex items-center justify-between bg-slate-900 dark:bg-[#0e0e0e] dark:border dark:border-[#222] text-white p-4 rounded-2xl shadow-lg">
               <div className="flex items-center gap-4">
                 <div className="p-2 bg-white/10 rounded-xl">
                    <SchoolHouseIcon className="w-6 h-6 text-red-300" />
@@ -253,10 +253,10 @@ export default function TimetableGenerator() {
 
             <div className="grid gap-8 lg:grid-cols-1">
               {cls.sections.map((section) => (
-                <Card key={section.id} className="border-slate-200 shadow-md">
-                  <CardHeader className="bg-slate-50/50 border-b flex flex-row items-center justify-between">
+                <Card key={section.id} className="border-slate-200 dark:border-[#222] dark:bg-[#111111] shadow-md">
+                  <CardHeader className="bg-slate-50/50 dark:bg-[#1a1a1a] border-b dark:border-[#222] flex flex-row items-center justify-between">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center font-black text-slate-900">
+                      <div className="w-10 h-10 rounded-full bg-white dark:bg-[#0e0e0e] border-2 border-slate-200 dark:border-[#333] flex items-center justify-center font-black text-slate-900 dark:text-gray-100">
                         {section.name}
                       </div>
                       <div className="relative group">
@@ -267,18 +267,18 @@ export default function TimetableGenerator() {
                         />
                         <Edit2 className="absolute -right-6 top-1/2 -translate-y-1/2 w-3 h-3 text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                       </div>
-                      <Badge variant="outline" className="text-slate-500">
+                      <Badge variant="outline" className="text-slate-500 dark:text-gray-400 dark:border-[#333]">
                         {section.subjects.length} Subjects
                       </Badge>
                     </div>
-                    <Button variant="ghost" size="sm" className="text-red-500 hover:bg-red-50" onClick={() => removeSection(cls.id, section.id)}>
+                    <Button variant="ghost" size="sm" className="text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10" onClick={() => removeSection(cls.id, section.id)}>
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </CardHeader>
                   <CardContent className="p-0">
                     <div className="overflow-x-auto">
                       <table className="w-full text-sm">
-                        <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-black tracking-widest border-b">
+                        <thead className="bg-slate-50 dark:bg-[#1a1a1a] text-slate-500 dark:text-gray-400 uppercase text-[10px] font-black tracking-widest border-b dark:border-[#222]">
                           <tr>
                             <th className="px-6 py-4 text-left w-20">Seq</th>
                             <th className="px-6 py-4 text-left">Subject Name</th>
@@ -289,9 +289,9 @@ export default function TimetableGenerator() {
                             <th className="px-6 py-4 text-right w-16"></th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody className="divide-y divide-slate-100 dark:divide-[#222]">
                           {section.subjects.map((sub, idx) => (
-                            <tr key={sub.id} className="hover:bg-slate-50/30 transition-colors">
+                            <tr key={sub.id} className="hover:bg-slate-50/30 dark:hover:bg-[#1a1a1a] transition-colors">
                               <td className="px-6 py-4">
                                 <div className="flex items-center gap-2 text-slate-400 font-bold">
                                    <Hash className="w-3 h-3" />
@@ -367,7 +367,7 @@ export default function TimetableGenerator() {
                       </table>
                     </div>
                   </CardContent>
-                  <CardFooter className="bg-slate-50/30 p-4 border-t">
+                  <CardFooter className="bg-slate-50/30 dark:bg-[#0e0e0e] p-4 border-t dark:border-[#222]">
                     <Button variant="link" className="text-red-600 font-bold gap-2 p-0 h-auto" onClick={() => addSubject(cls.id, section.id)}>
                       <Plus className="w-4 h-4" />
                       Add Subject Configuration

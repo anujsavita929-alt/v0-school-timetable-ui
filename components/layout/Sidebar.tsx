@@ -37,6 +37,7 @@ export function Sidebar({ role = 'student' }: SidebarProps) {
         { href: '/dashboard/principal/students', label: 'Students', icon: Users },
         { href: '/dashboard/principal/teachers', label: 'Teachers', icon: Users },
         { href: '/dashboard/principal/classes', label: 'Classes', icon: Users },
+        { href: '/dashboard/principal/setup', label: 'School Setup', icon: Settings },
         { href: '/dashboard/principal/timetable/generate', label: 'Timetable Generator', icon: Settings },
       ];
     } else if (role === 'teacher') {
@@ -59,14 +60,14 @@ export function Sidebar({ role = 'student' }: SidebarProps) {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen sticky top-0">
+      <aside className="hidden md:flex flex-col w-64 bg-white dark:bg-[#0e0e0e] border-r border-gray-200 dark:border-[#222] h-screen sticky top-0">
         {/* Logo Section */}
-        <div className="p-6 border-b border-gray-200">
+        <div className="p-6 border-b border-gray-200 dark:border-[#222]">
           <div className="flex items-center gap-2">
             <div className="w-8 h-8 bg-[#E74C3C] rounded-lg flex items-center justify-center">
               <Clock className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-lg text-gray-900">SchoolTime</span>
+            <span className="font-bold text-lg text-gray-900 dark:text-gray-100">SchoolTime</span>
           </div>
         </div>
 
@@ -82,7 +83,7 @@ export function Sidebar({ role = 'student' }: SidebarProps) {
                 className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                   active
                     ? 'bg-[#E74C3C] text-white'
-                    : 'text-gray-700 hover:bg-gray-100'
+                    : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1a1a1a]'
                 }`}
               >
                 <Icon className="w-5 h-5" />
@@ -93,10 +94,10 @@ export function Sidebar({ role = 'student' }: SidebarProps) {
         </nav>
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-200 space-y-2">
+        <div className="p-4 border-t border-gray-200 dark:border-[#222] space-y-2">
           <Button
             variant="ghost"
-            className="w-full justify-start text-gray-700 hover:bg-gray-100"
+            className="w-full justify-start text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1a1a1a]"
             onClick={() => router.push('/dashboard')}
           >
             <Settings className="w-5 h-5 mr-3" />
@@ -104,7 +105,7 @@ export function Sidebar({ role = 'student' }: SidebarProps) {
           </Button>
           <Button
             variant="ghost"
-            className="w-full justify-start text-red-600 hover:bg-red-50"
+            className="w-full justify-start text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"
             onClick={() => {
               sessionStorage.clear();
               router.push('/role-selection');
@@ -119,26 +120,26 @@ export function Sidebar({ role = 'student' }: SidebarProps) {
       {/* Mobile Menu Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="md:hidden p-2 hover:bg-gray-100 rounded-lg"
+        className="md:hidden p-2 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded-lg"
       >
         {isOpen ? (
-          <X className="w-6 h-6" />
+          <X className="w-6 h-6 dark:text-gray-100" />
         ) : (
-          <Menu className="w-6 h-6" />
+          <Menu className="w-6 h-6 dark:text-gray-100" />
         )}
       </button>
 
       {/* Mobile Sidebar */}
       {isOpen && (
         <div className="md:hidden fixed inset-0 z-50 bg-black/50">
-          <aside className="absolute left-0 top-0 w-64 bg-white h-screen flex flex-col">
+          <aside className="absolute left-0 top-0 w-64 bg-white dark:bg-[#0e0e0e] h-screen flex flex-col">
             {/* Logo Section */}
-            <div className="p-6 border-b border-gray-200">
+            <div className="p-6 border-b border-gray-200 dark:border-[#222]">
               <div className="flex items-center gap-2">
                 <div className="w-8 h-8 bg-[#E74C3C] rounded-lg flex items-center justify-center">
                   <Clock className="w-5 h-5 text-white" />
                 </div>
-                <span className="font-bold text-lg text-gray-900">SchoolTime</span>
+                <span className="font-bold text-lg text-gray-900 dark:text-gray-100">SchoolTime</span>
               </div>
             </div>
 
@@ -155,7 +156,7 @@ export function Sidebar({ role = 'student' }: SidebarProps) {
                     className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
                       active
                         ? 'bg-[#E74C3C] text-white'
-                        : 'text-gray-700 hover:bg-gray-100'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1a1a1a]'
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -166,10 +167,10 @@ export function Sidebar({ role = 'student' }: SidebarProps) {
             </nav>
 
             {/* Footer */}
-            <div className="p-4 border-t border-gray-200 space-y-2">
+            <div className="p-4 border-t border-gray-200 dark:border-[#222] space-y-2">
               <Button
                 variant="ghost"
-                className="w-full justify-start text-gray-700 hover:bg-gray-100"
+                className="w-full justify-start text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-[#1a1a1a]"
                 onClick={() => {
                   setIsOpen(false);
                   router.push('/dashboard');
@@ -180,7 +181,7 @@ export function Sidebar({ role = 'student' }: SidebarProps) {
               </Button>
               <Button
                 variant="ghost"
-                className="w-full justify-start text-red-600 hover:bg-red-50"
+                className="w-full justify-start text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10"
                 onClick={() => {
                   setIsOpen(false);
                   sessionStorage.clear();

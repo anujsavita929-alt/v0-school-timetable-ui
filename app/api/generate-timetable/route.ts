@@ -126,111 +126,73 @@ function getSubjectInstances(classes: ClassConfig[]) {
   );
 }
 
-function buildSchedule(instances: Array<{
-  classNum: string;
-  section: string;
-  subject: string;
-  teacher: string;
-  priority: number;
-  isLab: boolean;
-  sequence: number;
-}>, maxRetries = 100) {
-  const allSlots = DAYS.flatMap((day) =>
-    PERIOD_TIMES.map((time, period) => ({
-      day,
-      period,
-      time,
-      slotKey: `${day}-${period}`,
-    })),
-  );
+import { spawn } from "child_process";
+import path from "path";
 
-  const LABS = ["Physics Lab", "Chemistry Lab", "Computer Lab 1", "Computer Lab 2", "Bio Lab"];
+async function buildSchedule(instances: any[], config: any) {
+  return new Promise((resolve, reject) => {
+    const pythonPath = process.platform === "win32" ? "python" : "python3";
+    const scriptPath = path.join(process.cwd(), "generatingalgo", "genetic_scheduler.py");
+    
+    const payload = {
+      classes: instances,
+      config: {
+        totalPeriodsPerDay: config.totalPeriodsPerDay,
+        bellTimes: config.bellTimes,
+        labs: config.labs
+      }
+    };
 
-  const sortedInstances = [...instances].sort((a, b) => {
-    if (b.priority !== a.priority) return b.priority - a.priority;
-    if (b.isLab !== a.isLab) return Number(b.isLab) - Number(a.isLab);
-    if (a.classNum !== b.classNum) return a.classNum.localeCompare(b.classNum);
-    if (a.section !== b.section) return a.section.localeCompare(b.section);
-    return a.subject.localeCompare(b.subject);
-  });
+    const pyProcess = spawn(pythonPath, [scriptPath]);
+    
+    let result = "";
+    let error = "";
 
-  let bestError: Error | null = null;
+    pyProcess.stdin.write(JSON.stringify(payload));
+    pyProcess.stdin.end();
 
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    const teacherOccupancy = new Map<string, Set<string>>();
-    const classOccupancy = new Map<string, Set<string>>();
-    const roomOccupancy = new Map<string, Set<string>>();
-    const assigned: GeneratedSlot[] = [];
-    let success = true;
+    pyProcess.stdout.on("data", (data) => {
+      result += data.toString();
+    });
 
-    for (const instance of sortedInstances) {
-      const classKey = `${instance.classNum}-${instance.section}`;
-      const teacherKey = instance.teacher && instance.teacher !== "N/A" ? instance.teacher : "";
+    pyProcess.stderr.on("data", (data) => {
+      error += data.toString();
+    });
 
-      let slot = null;
-      let assignedRoom = "";
-
-      // Iterate through slots. Use a semi-random approach to avoid getting stuck in linear traps
-      const shuffledSlots = [...allSlots].sort(() => Math.random() - 0.5);
-
-      for (const possibleSlot of shuffledSlots) {
-        if (classOccupancy.get(classKey)?.has(possibleSlot.slotKey)) continue;
-        if (teacherKey && teacherOccupancy.get(teacherKey)?.has(possibleSlot.slotKey)) continue;
-
-        if (instance.isLab) {
-          const availableLab = LABS.find(lab => !roomOccupancy.get(lab)?.has(possibleSlot.slotKey));
-          if (availableLab) {
-            slot = possibleSlot;
-            assignedRoom = availableLab;
-            break;
-          }
+    pyProcess.on("close", (code) => {
+      if (code !== 0) {
+        reject(new Error(`Python script failed with code ${code}: ${error}`));
+        return;
+      }
+      try {
+        const parsed = JSON.parse(result);
+        if (parsed.error) {
+          reject(new Error(parsed.error));
         } else {
-          slot = possibleSlot;
-          assignedRoom = getHomeRoom(instance.classNum, instance.section);
-          break;
+          // Normalize the output to match the expected GeneratedSlot[]
+          const assigned: GeneratedSlot[] = [];
+          for (const clsNum in parsed) {
+            for (const secName in parsed[clsNum]) {
+              for (const slot of parsed[clsNum][secName]) {
+                assigned.push({
+                  classNum: clsNum,
+                  section: secName,
+                  day: slot.day,
+                  period: slot.period,
+                  subject: slot.subject,
+                  teacher: slot.teacher,
+                  room: slot.room
+                });
+              }
+            }
+          }
+          resolve(assigned);
         }
+      } catch (e) {
+        reject(new Error(`Failed to parse Python output: ${result}`));
       }
-
-      if (!slot) {
-        // If we cannot find a slot at all, record the error and break to retry the whole batch
-        bestError = new Error(`Not enough timetable slots to schedule ${instance.subject} for Class ${instance.classNum}-${instance.section}. Teacher limit or Lab capacity exceeded.`);
-        success = false;
-        break;
-      }
-
-      assigned.push({
-        classNum: instance.classNum,
-        section: instance.section,
-        day: slot.day,
-        period: slot.period,
-        subject: instance.subject,
-        teacher: instance.teacher,
-        room: assignedRoom,
-      });
-
-      const cSet = classOccupancy.get(classKey) ?? new Set<string>();
-      cSet.add(slot.slotKey);
-      classOccupancy.set(classKey, cSet);
-
-      if (teacherKey) {
-        const tSet = teacherOccupancy.get(teacherKey) ?? new Set<string>();
-        tSet.add(slot.slotKey);
-        teacherOccupancy.set(teacherKey, tSet);
-      }
-      
-      if (instance.isLab) {
-        const rSet = roomOccupancy.get(assignedRoom) ?? new Set<string>();
-        rSet.add(slot.slotKey);
-        roomOccupancy.set(assignedRoom, rSet);
-      }
-    }
-
-    if (success) {
-      return assigned;
-    }
-  }
-
-  throw bestError || new Error("Failed to generate timetable due to unresolvable constraints.");
+    });
+  });
 }
 
 async function getDefaultOrganization() {
@@ -315,29 +277,18 @@ async function getOrCreateClassGroup(name: string, organizationId: string) {
   });
 }
 
-async function ensurePeriodSlotIds(organizationId: string) {
+async function ensurePeriodSlotIds(organizationId: string, bellTimes: any[]) {
   const map = new Map<string, string>();
 
   for (const [dayIndex, day] of DAYS.entries()) {
     const dayOfWeek = dayIndex + 1;
-    for (const [period, startTime] of PERIOD_TIMES.entries()) {
-      const endTime =
-        period === 0
-          ? "08:50"
-          : period === 1
-          ? "09:50"
-          : period === 2
-          ? "10:50"
-          : period === 3
-          ? "12:25"
-          : period === 4
-          ? "13:25"
-          : period === 5
-          ? "14:25"
-          : period === 6
-          ? "15:25"
-          : "16:25";
+    for (const bt of bellTimes) {
+      if (bt.isBreak) continue;
+      
+      const startTime = bt.startTime;
+      const endTime = bt.endTime;
       const uniqueKey = `${day}-${startTime}`;
+      
       const slot = await prisma.periodSlot.upsert({
         where: {
           organizationId_dayOfWeek_startTime: {
@@ -387,9 +338,24 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const generatedSchedule = buildSchedule(validInstances);
+    const schoolConfig = await prisma.schoolConfig.findFirst({
+      include: { bellTimes: true, labs: true }
+    });
+    
+    if (!schoolConfig) {
+      return NextResponse.json({ error: "School configuration not found. Please set up bell times and labs first." }, { status: 400 });
+    }
+
+    const generatedSchedule = await buildSchedule(validInstances, schoolConfig) as GeneratedSlot[];
     const organization = await getDefaultOrganization();
-    const periodSlotIds = await ensurePeriodSlotIds(organization.id);
+    
+    // Create a map of period index to start time based on DB config
+    const dbPeriodTimes = schoolConfig.bellTimes
+      .filter(bt => !bt.isBreak)
+      .sort((a, b) => a.periodNumber - b.periodNumber)
+      .map(bt => bt.startTime);
+
+    const periodSlotIds = await ensurePeriodSlotIds(organization.id, schoolConfig.bellTimes);
 
     const classGroupMap = new Map<string, { id: string; name: string }>();
     const teacherMap = new Map<string, { id: string; name: string }>();
@@ -422,7 +388,14 @@ export async function POST(req: NextRequest) {
 
     const createData = generatedSchedule.map((slot) => {
       const classGroupName = `${slot.classNum}-${slot.section}`;
-      const periodSlotId = periodSlotIds.get(`${slot.day}-${PERIOD_TIMES[slot.period]}`);
+      // Find the startTime for this period index from schoolConfig
+      const periodConfig = schoolConfig.bellTimes
+        .filter(bt => !bt.isBreak)
+        .sort((a, b) => a.periodNumber - b.periodNumber)[slot.period];
+      
+      const startTime = periodConfig?.startTime ?? "08:00";
+      const periodSlotId = periodSlotIds.get(`${slot.day}-${startTime}`);
+      
       return {
         id: `${slot.classNum}-${slot.section}-${slot.day}-${slot.period}`,
         organizationId: organization.id,

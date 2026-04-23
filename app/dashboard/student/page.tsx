@@ -8,50 +8,50 @@ export default function StudentDashboard() {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-end">
         <div>
-          <h1 className="text-3xl font-black text-slate-900">Student Portal</h1>
-          <p className="text-slate-500">View your current schedule and academic performance.</p>
+          <h1 className="text-3xl font-black text-slate-900 dark:text-gray-100">Student Portal</h1>
+          <p className="text-slate-500 dark:text-gray-400">View your current schedule and academic performance.</p>
         </div>
       </div>
 
       <div className="grid gap-6 md:grid-cols-3">
-        <Card className="border-slate-200">
+        <Card className="border-slate-200 dark:border-[#222] dark:bg-[#111111]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold text-red-600">Current Grade</CardTitle>
+            <CardTitle className="text-sm font-bold text-pink-600 dark:text-pink-400">Current Grade</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black">A-</div>
-            <p className="text-xs text-slate-500 mt-1">Class Rank: 12/45</p>
+            <div className="text-3xl font-black dark:text-gray-100">A-</div>
+            <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">Class Rank: 12/45</p>
           </CardContent>
         </Card>
-        <Card className="border-slate-200">
+        <Card className="border-slate-200 dark:border-[#222] dark:bg-[#111111]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold text-emerald-600">Attendance</CardTitle>
+            <CardTitle className="text-sm font-bold text-emerald-600 dark:text-emerald-400">Attendance</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black">96%</div>
-            <p className="text-xs text-slate-500 mt-1">2 days missed this term</p>
+            <div className="text-3xl font-black dark:text-gray-100">96%</div>
+            <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">2 days missed this term</p>
           </CardContent>
         </Card>
-        <Card className="border-slate-200">
+        <Card className="border-slate-200 dark:border-[#222] dark:bg-[#111111]">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-bold text-red-600">Credits</CardTitle>
+            <CardTitle className="text-sm font-bold text-pink-600 dark:text-pink-400">Credits</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-black">28/32</div>
-            <p className="text-xs text-slate-500 mt-1">On track for graduation</p>
+            <div className="text-3xl font-black dark:text-gray-100">28/32</div>
+            <p className="text-xs text-slate-500 dark:text-gray-400 mt-1">On track for graduation</p>
           </CardContent>
         </Card>
       </div>
 
-      <Card className="border-slate-200 shadow-xl overflow-hidden">
-        <CardHeader className="bg-slate-900 text-white">
+      <Card className="border-slate-200 dark:border-[#222] shadow-xl overflow-hidden">
+        <CardHeader className="bg-slate-900 dark:bg-[#111111] dark:border-b dark:border-[#222] text-white">
           <CardTitle className="flex items-center gap-2">
-            <Clock className="w-5 h-5 text-red-300" />
+            <Clock className="w-5 h-5 text-pink-300" />
             Today's Schedule
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-0">
-          <div className="divide-y divide-slate-100">
+        <CardContent className="p-0 dark:bg-[#0e0e0e]">
+          <div className="divide-y divide-slate-100 dark:divide-[#222]">
             {[
               { time: "08:00", sub: "Mathematics", teacher: "Mr. Sharma", room: "101" },
               { time: "09:00", sub: "Physics", teacher: "Ms. Verma", room: "105" },
@@ -59,13 +59,13 @@ export default function StudentDashboard() {
               { time: "10:50", sub: "Lunch Break", isBreak: true },
               { time: "11:35", sub: "Computer Science", teacher: "Ms. Lee", room: "Lab 1" },
             ].map((s, i) => (
-              <div key={i} className={`flex items-center gap-4 p-4 ${s.isBreak ? 'bg-orange-50/50' : 'hover:bg-slate-50'}`}>
-                <span className="text-sm font-black text-slate-400 w-16">{s.time}</span>
+              <div key={i} className={`flex items-center gap-4 p-4 ${s.isBreak ? 'bg-orange-50/50 dark:bg-orange-500/5' : 'hover:bg-slate-50 dark:hover:bg-[#1a1a1a]'}`}>
+                <span className="text-sm font-black text-slate-400 dark:text-gray-500 w-16">{s.time}</span>
                 <div className="flex-1">
-                  <p className={`font-bold ${s.isBreak ? 'text-orange-600' : 'text-slate-900'}`}>{s.sub}</p>
-                  {!s.isBreak && <p className="text-xs text-slate-500">{s.teacher} • Room {s.room}</p>}
+                  <p className={`font-bold ${s.isBreak ? 'text-orange-600 dark:text-orange-400' : 'text-slate-900 dark:text-gray-100'}`}>{s.sub}</p>
+                  {!s.isBreak && <p className="text-xs text-slate-500 dark:text-gray-500">{s.teacher} • Room {s.room}</p>}
                 </div>
-                {s.isBreak ? <Coffee className="w-4 h-4 text-orange-400" /> : <ChevronRight className="w-4 h-4 text-slate-300" />}
+                {s.isBreak ? <CoffeeIcon className="w-4 h-4 text-orange-400" /> : <ChevronRightIcon className="w-4 h-4 text-slate-300 dark:text-gray-600" />}
               </div>
             ))}
           </div>
@@ -75,7 +75,7 @@ export default function StudentDashboard() {
   );
 }
 
-function Coffee(props: any) {
+function CoffeeIcon(props: any) {
   return (
     <svg
       {...props}
@@ -98,7 +98,7 @@ function Coffee(props: any) {
   );
 }
 
-function ChevronRight(props: any) {
+function ChevronRightIcon(props: any) {
   return (
     <svg
       {...props}

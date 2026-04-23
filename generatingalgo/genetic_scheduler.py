@@ -4,13 +4,28 @@ import sys
 
 class TimetableGA:
     def __init__(self, data):
-        self.classes_input = data
+        # Input format change: data now contains 'classes' and 'config'
+        self.classes_input = data.get('classes', [])
+        self.config = data.get('config', {})
+        
         self.days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
-        self.periods_per_day = 8 # 3 before lunch, 5 after
+        self.total_periods = self.config.get('totalPeriodsPerDay', 8)
+        self.bell_times = self.config.get('bellTimes', [])
+        self.labs = self.config.get('labs', [])
+        
+        # Determine which periods are actually available (not breaks)
+        self.active_periods = sorted([
+            bt['periodNumber'] - 1 # 0-indexed for the algorithm
+            for bt in self.bell_times if not bt.get('isBreak', False)
+        ])
+        
         self.population_size = 30
         self.generations = 50
 
     def solve(self):
+        if not self.classes_input:
+            return {"error": "No classes provided"}
+            
         population = [self.generate_random_schedule() for _ in range(self.population_size)]
         
         for generation in range(self.generations):
@@ -25,23 +40,22 @@ class TimetableGA:
                 new_pop.append(child)
             population = new_pop
 
-        # Post-process: Add "Study/Library" periods for gaps if day is too empty
         return self.fill_gaps(population[0])
 
     def fill_gaps(self, schedule):
-        # Auto-fill gaps with constructive activities to make it look "Effective"
         for cls_num in schedule:
             for sec_name in schedule[cls_num]:
                 existing_slots = {(s['day'], s['period']) for s in schedule[cls_num][sec_name]}
                 filled_sessions = list(schedule[cls_num][sec_name])
                 
-                # If a day has classes but also many gaps, add "Self Study" in the middle
                 for day in self.days:
                     day_slots = sorted([p for d, p in existing_slots if d == day])
                     if not day_slots: continue
                     
                     min_p, max_p = min(day_slots), max(day_slots)
-                    for p in range(min_p, max_p + 1):
+                    # Only fill gaps within the active periods range
+                    for p in self.active_periods:
+                        if p < min_p or p > max_p: continue
                         if (day, p) not in existing_slots:
                             filled_sessions.append({
                                 'subject': 'Self Study',
@@ -58,6 +72,9 @@ class TimetableGA:
 
     def generate_random_schedule(self):
         schedule = {}
+        # Get available labs
+        available_labs = [l['name'] for l in self.labs if l.get('isAvailable', True)]
+        
         for cls in self.classes_input:
             cls_num = cls['number']
             schedule[cls_num] = {}
@@ -65,19 +82,20 @@ class TimetableGA:
                 sec_name = sec['name']
                 schedule[cls_num][sec_name] = []
                 
-                # Pool of sessions to schedule
                 sessions = []
                 for sub in sec['subjects']:
                     for _ in range(sub['maxPeriods']):
+                        lab_name = random.choice(available_labs) if sub['isLab'] and available_labs else "Lab-X"
                         sessions.append({
                             'subject': sub['name'],
                             'teacher': sub['teacher'],
                             'priority': sub['priority'],
                             'isLab': sub['isLab'],
-                            'room': f"Room {cls_num}-{sec_name}" if not sub['isLab'] else "Lab-X"
+                            'room': f"Room {cls_num}-{sec_name}" if not sub['isLab'] else lab_name
                         })
                 
-                slots = [(d, p) for d in self.days for p in range(self.periods_per_day)]
+                # Use only active periods for scheduling
+                slots = [(d, p) for d in self.days for p in self.active_periods]
                 random.shuffle(slots)
                 
                 for i, sess in enumerate(sessions):
@@ -90,39 +108,48 @@ class TimetableGA:
     def calculate_fitness(self, schedule):
         penalties = 0
         teacher_load = {}
+        room_load = {} # day, period, room -> count
         
         for cls_num, sections in schedule.items():
             for sec_name, sessions in sections.items():
-                day_sessions = {} # day -> list of periods
+                day_sessions = {}
                 day_sub_count = {}
                 
                 for s in sessions:
                     # Teacher Collision
                     t_key = (s['day'], s['period'], s['teacher'])
-                    teacher_load[t_key] = teacher_load.get(t_key, 0) + 1
-                    if teacher_load[t_key] > 1: penalties += 1000 # Critical
+                    if s['teacher'] != 'N/A':
+                        teacher_load[t_key] = teacher_load.get(t_key, 0) + 1
+                        if teacher_load[t_key] > 1: penalties += 1000
                     
-                    # Morning Priority
-                    if s['priority'] >= 4 and s['period'] > 3: penalties += 50
+                    # Room/Lab Collision
+                    r_key = (s['day'], s['period'], s['room'])
+                    room_load[r_key] = room_load.get(r_key, 0) + 1
+                    if room_load[r_key] > 1: penalties += 500
                     
-                    # Subject frequency limit
+                    # Morning Priority (High priority subjects in first 3 active periods)
+                    first_slots = self.active_periods[:3]
+                    if s['priority'] >= 4 and s['period'] not in first_slots: penalties += 50
+                    
+                    # Subject frequency limit (Max 2 of same subject per day)
                     ds_key = (s['day'], s['subject'])
                     day_sub_count[ds_key] = day_sub_count.get(ds_key, 0) + 1
                     if day_sub_count[ds_key] > 2: penalties += 30
                     
-                    # Track periods per day for compactness
                     day_sessions.setdefault(s['day'], []).append(s['period'])
                 
-                # Compactness Penalty: gaps between min and max period of the day
                 for day, periods in day_sessions.items():
                     if not periods: continue
                     periods.sort()
-                    span = max(periods) - min(periods) + 1
-                    gaps = span - len(periods)
-                    penalties += gaps * 25 # High penalty for holes
                     
-                    # Bonus for starting early (not starting after period 2)
-                    if min(periods) > 1: penalties += 20
+                    # Compactness Penalty
+                    # We check for gaps within the active periods that are between min and max assigned periods
+                    span_range = [p for p in self.active_periods if min(periods) <= p <= max(periods)]
+                    gaps = len(span_range) - len(periods)
+                    penalties += gaps * 25
+                    
+                    # Start early bonus (if starts at the very first active period)
+                    if min(periods) > self.active_periods[0]: penalties += 20
         
         return 1 / (1 + penalties)
 
@@ -134,6 +161,7 @@ class TimetableGA:
 
     def mutate(self, schedule):
         cls = random.choice(list(schedule.keys()))
+        if not schedule[cls]: return
         sec = random.choice(list(schedule[cls].keys()))
         if len(schedule[cls][sec]) > 2:
             i1, i2 = random.sample(range(len(schedule[cls][sec])), 2)
@@ -143,8 +171,12 @@ class TimetableGA:
 
 if __name__ == "__main__":
     try:
-        input_data = json.loads(sys.stdin.read())
+        input_raw = sys.stdin.read()
+        if not input_raw:
+             print(json.dumps({"error": "No input received"}))
+             sys.exit(1)
+        input_data = json.loads(input_raw)
         ga = TimetableGA(input_data)
         print(json.dumps(ga.solve()))
-    except:
-        print(json.dumps({"error": "Invalid input"}))
+    except Exception as e:
+        print(json.dumps({"error": str(e)}))

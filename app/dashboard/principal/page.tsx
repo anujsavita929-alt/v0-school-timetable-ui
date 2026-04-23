@@ -100,15 +100,15 @@ export default function PrincipalDashboard() {
     <div className="p-6 space-y-8 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Principal Dashboard</h1>
-          <p className="text-slate-500">Welcome back, Principal. Here's what's happening at SchoolTime today.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-gray-100">Principal Dashboard</h1>
+          <p className="text-slate-500 dark:text-gray-400">Welcome back, Principal. Here's what's happening at SchoolTime today.</p>
         </div>
         <div className="flex items-center gap-3">
-          <Button variant="outline" className="gap-2">
+          <Button variant="outline" className="gap-2 dark:border-[#333] dark:text-gray-300 dark:hover:bg-[#1a1a1a]">
             <Calendar className="w-4 h-4" />
             March 22, 2026
           </Button>
-          <Button className="bg-slate-900 gap-2" asChild>
+          <Button className="bg-slate-900 dark:bg-red-600 dark:hover:bg-red-700 gap-2" asChild>
             <Link href="/dashboard/principal/timetable/generate">
               <Clock className="w-4 h-4" />
               Generate Timetable
@@ -121,16 +121,16 @@ export default function PrincipalDashboard() {
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {stats.map((stat) => (
           <Link key={stat.title} href={stat.href}>
-            <Card className="hover:shadow-lg transition-all duration-300 border-slate-200 cursor-pointer group h-full">
+            <Card className="hover:shadow-lg transition-all duration-300 border-slate-200 dark:border-[#222] dark:bg-[#111111] cursor-pointer group h-full">
               <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-                <CardTitle className="text-sm font-medium text-slate-600">{stat.title}</CardTitle>
+                <CardTitle className="text-sm font-medium text-slate-600 dark:text-gray-400">{stat.title}</CardTitle>
                 <div className={`${stat.color} p-2 rounded-lg text-white group-hover:scale-110 transition-transform`}>
                   <stat.icon className="w-4 h-4" />
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-slate-900">{stat.value}</div>
-                <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                <div className="text-3xl font-bold text-slate-900 dark:text-gray-100">{stat.value}</div>
+                <p className="text-xs text-slate-500 dark:text-gray-400 mt-1 flex items-center gap-1">
                   <TrendingUp className="w-3 h-3 text-emerald-500" />
                   {stat.description}
                 </p>
@@ -142,14 +142,14 @@ export default function PrincipalDashboard() {
 
       <div className="grid gap-6 md:grid-cols-3">
         {/* Today's Schedule - Left Column */}
-        <Card className="md:col-span-2 shadow-sm border-slate-200">
+        <Card className="md:col-span-2 shadow-sm border-slate-200 dark:border-[#222] dark:bg-[#111111]">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-xl font-bold">Today's Schedule</CardTitle>
+            <CardTitle className="text-xl font-bold dark:text-gray-100">Today's Schedule</CardTitle>
             <div className="flex gap-2">
               <Button size="sm" className="bg-red-600 hover:bg-red-700" asChild>
                 <Link href="/dashboard/principal/timetable/generate">Generate Timetable</Link>
               </Button>
-              <Button size="sm" variant="outline" asChild>
+              <Button size="sm" variant="outline" className="dark:border-[#333] dark:text-gray-300" asChild>
                 <Link href="/timetable">View Full Schedule</Link>
               </Button>
             </div>
@@ -160,17 +160,17 @@ export default function PrincipalDashboard() {
               { title: "Lunch Break", time: "10:50 AM - 11:35 AM", location: "Cafeteria", icon: Coffee, isBreak: true },
               { title: "Class 10-A Mathematics", time: "12:35 PM - 01:25 PM", location: "Room 101", icon: SchoolIcon },
             ].map((event, i) => (
-              <div key={i} className="flex items-center justify-between p-4 rounded-xl border bg-slate-50/50 hover:bg-slate-50 transition-colors">
+              <div key={i} className="flex items-center justify-between p-4 rounded-xl border border-slate-200/50 dark:border-[#222] bg-slate-50/50 dark:bg-[#1a1a1a] hover:bg-slate-50 dark:hover:bg-[#222] transition-colors">
                 <div className="flex items-center gap-4">
-                  <div className={`p-3 rounded-xl ${event.isBreak ? 'bg-orange-100 text-orange-600' : 'bg-red-100 text-red-600'}`}>
+                  <div className={`p-3 rounded-xl ${event.isBreak ? 'bg-orange-100 dark:bg-orange-500/10 text-orange-600 dark:text-orange-400' : 'bg-red-100 dark:bg-red-500/10 text-red-600 dark:text-red-400'}`}>
                     <event.icon className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-bold text-slate-900">{event.title}</h4>
-                    <p className="text-xs text-slate-500 uppercase tracking-widest font-bold">{event.location}</p>
+                    <h4 className="font-bold text-slate-900 dark:text-gray-100">{event.title}</h4>
+                    <p className="text-xs text-slate-500 dark:text-gray-500 uppercase tracking-widest font-bold">{event.location}</p>
                   </div>
                 </div>
-                <div className="text-sm font-bold text-slate-800">
+                <div className="text-sm font-bold text-slate-800 dark:text-gray-200">
                   {event.time}
                 </div>
               </div>
@@ -179,9 +179,9 @@ export default function PrincipalDashboard() {
         </Card>
 
         {/* Quick Actions - Right Column */}
-        <Card className="shadow-sm border-slate-200">
+        <Card className="shadow-sm border-slate-200 dark:border-[#222] dark:bg-[#111111]">
           <CardHeader>
-            <CardTitle className="text-xl font-bold">Quick Actions</CardTitle>
+            <CardTitle className="text-xl font-bold dark:text-gray-100">Quick Actions</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
             <Button 

@@ -192,8 +192,8 @@ export function GenerateTimetableModal({
         {systemStatus && (
           <div className={`p-4 rounded-lg border ${
             systemStatus.canGenerate 
-              ? 'bg-green-50 border-green-200' 
-              : 'bg-yellow-50 border-yellow-200'
+              ? 'bg-green-50 dark:bg-green-500/10 border-green-200 dark:border-green-500/20' 
+              : 'bg-yellow-50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20'
           }`}>
             <div className="flex items-start gap-3">
               {systemStatus.canGenerate ? (
@@ -207,7 +207,7 @@ export function GenerateTimetableModal({
                 </h4>
                 <div className="grid grid-cols-3 gap-4 text-sm">
                   <div>
-                    <span className="text-gray-600">Teachers:</span>
+                    <span className="text-gray-600 dark:text-gray-400">Teachers:</span>
                     <span className={`ml-2 font-medium ${
                       systemStatus.teachers > 0 ? 'text-green-600' : 'text-red-600'
                     }`}>
@@ -215,7 +215,7 @@ export function GenerateTimetableModal({
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-600">Classes:</span>
+                    <span className="text-gray-600 dark:text-gray-400">Classes:</span>
                     <span className={`ml-2 font-medium ${
                       systemStatus.classes > 0 ? 'text-green-600' : 'text-red-600'
                     }`}>
@@ -223,7 +223,7 @@ export function GenerateTimetableModal({
                     </span>
                   </div>
                   <div>
-                    <span className="text-gray-600">Subjects:</span>
+                    <span className="text-gray-600 dark:text-gray-400">Subjects:</span>
                     <span className={`ml-2 font-medium ${
                       systemStatus.subjects > 0 ? 'text-green-600' : 'text-red-600'
                     }`}>
@@ -245,12 +245,12 @@ export function GenerateTimetableModal({
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
             {/* Class Selection */}
             <div>
-              <FormLabel className="text-sm font-medium text-gray-900 mb-3 block">
+              <FormLabel className="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 block">
                 Select Classes
               </FormLabel>
               <div className="space-y-2 max-h-32 overflow-y-auto border rounded-lg p-3">
                 {classes.length === 0 ? (
-                  <p className="text-sm text-gray-500">No classes available</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">No classes available</p>
                 ) : (
                   classes.map((cls) => (
                     <div key={cls.id} className="flex items-center space-x-2">
@@ -319,7 +319,7 @@ export function GenerateTimetableModal({
 
             {/* Constraints */}
             <div className="space-y-4">
-              <h3 className="text-sm font-medium text-gray-900">Generation Constraints</h3>
+              <h3 className="text-sm font-medium text-gray-900 dark:text-gray-100">Generation Constraints</h3>
               
               <FormField
                 control={form.control}
@@ -392,7 +392,7 @@ export function GenerateTimetableModal({
                       </FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel>Avoid Teacher Conflicts</FormLabel>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           Prevent teachers from being double-booked
                         </p>
                       </div>
@@ -414,7 +414,7 @@ export function GenerateTimetableModal({
                       </FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel>Respect Room Availability</FormLabel>
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           Prevent rooms from being double-booked
                         </p>
                       </div>

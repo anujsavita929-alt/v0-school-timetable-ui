@@ -103,38 +103,38 @@ export default function EmailLogsPage() {
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
         <Link href="/dashboard/teacher">
-          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-            <ArrowLeft className="w-5 h-5 text-gray-600" />
+          <button className="p-2 hover:bg-gray-100 dark:hover:bg-[#1a1a1a] rounded-lg transition-colors">
+            <ArrowLeft className="w-5 h-5 text-gray-600 dark:text-gray-300" />
           </button>
         </Link>
         <div>
-          <h1 className="text-4xl font-bold text-gray-900">Email Notification Logs</h1>
-          <p className="text-gray-600 mt-1">Track all absence notification emails sent to students</p>
+          <h1 className="text-4xl font-bold text-gray-900 dark:text-gray-100">Email Notification Logs</h1>
+          <p className="text-gray-600 dark:text-gray-400 mt-1">Track all absence notification emails sent to students</p>
         </div>
       </div>
 
       {/* Summary Stats */}
       <div className="grid md:grid-cols-4 gap-6">
-        <Card className="p-6 border border-gray-200 rounded-2xl">
-          <p className="text-gray-600 text-sm font-medium">Total Emails</p>
-          <p className="text-3xl font-bold text-gray-900 mt-2">248</p>
+        <Card className="p-6 border border-gray-200 dark:border-[#222] dark:bg-[#111111] rounded-2xl">
+          <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">Total Emails</p>
+          <p className="text-3xl font-bold text-gray-900 dark:text-gray-100 mt-2">248</p>
         </Card>
-        <Card className="p-6 border border-gray-200 rounded-2xl">
-          <p className="text-gray-600 text-sm font-medium">Successful</p>
+        <Card className="p-6 border border-gray-200 dark:border-[#222] dark:bg-[#111111] rounded-2xl">
+          <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">Successful</p>
           <p className="text-3xl font-bold text-[#27AE60] mt-2">235</p>
         </Card>
-        <Card className="p-6 border border-gray-200 rounded-2xl">
-          <p className="text-gray-600 text-sm font-medium">Partial</p>
+        <Card className="p-6 border border-gray-200 dark:border-[#222] dark:bg-[#111111] rounded-2xl">
+          <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">Partial</p>
           <p className="text-3xl font-bold text-[#F39C12] mt-2">8</p>
         </Card>
-        <Card className="p-6 border border-gray-200 rounded-2xl">
-          <p className="text-gray-600 text-sm font-medium">Failed</p>
+        <Card className="p-6 border border-gray-200 dark:border-[#222] dark:bg-[#111111] rounded-2xl">
+          <p className="text-gray-600 dark:text-gray-400 text-sm font-medium">Failed</p>
           <p className="text-3xl font-bold text-[#E74C3C] mt-2">5</p>
         </Card>
       </div>
 
       {/* Filters */}
-      <Card className="p-6 border border-gray-200 rounded-2xl">
+      <Card className="p-6 border border-gray-200 dark:border-[#222] dark:bg-[#111111] rounded-2xl">
         <div className="grid md:grid-cols-3 gap-4">
           {/* Search */}
           <div>
@@ -183,41 +183,41 @@ export default function EmailLogsPage() {
       </Card>
 
       {/* Email Logs Table */}
-      <Card className="p-6 border border-gray-200 rounded-2xl overflow-hidden">
+      <Card className="p-6 border border-gray-200 dark:border-[#222] dark:bg-[#111111] rounded-2xl overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Date & Time</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Teacher</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Class</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Subject</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Emails Sent</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Status</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-900 text-sm">Action</th>
+              <tr className="border-b border-gray-200 dark:border-[#222]">
+                <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-200 text-sm">Date & Time</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-200 text-sm">Teacher</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-200 text-sm">Class</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-200 text-sm">Subject</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-200 text-sm">Emails Sent</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-200 text-sm">Status</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-900 dark:text-gray-200 text-sm">Action</th>
               </tr>
             </thead>
             <tbody>
               {filteredLogs.length > 0 ? (
                 filteredLogs.map((log) => (
-                  <tr key={log.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                  <tr key={log.id} className="border-b border-gray-100 dark:border-[#222] hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors">
                     <td className="py-4 px-4">
                       <div className="text-sm">
-                        <p className="text-gray-900 font-medium">{log.date}</p>
-                        <p className="text-gray-600">{log.time}</p>
+                        <p className="text-gray-900 dark:text-gray-100 font-medium">{log.date}</p>
+                        <p className="text-gray-600 dark:text-gray-400">{log.time}</p>
                       </div>
                     </td>
                     <td className="py-4 px-4">
-                      <span className="text-gray-900 font-medium">{log.teacher}</span>
+                      <span className="text-gray-900 dark:text-gray-100 font-medium">{log.teacher}</span>
                     </td>
                     <td className="py-4 px-4">
-                      <span className="text-gray-700">{log.class}</span>
+                      <span className="text-gray-700 dark:text-gray-300">{log.class}</span>
                     </td>
                     <td className="py-4 px-4">
-                      <span className="text-gray-700">{log.subject}</span>
+                      <span className="text-gray-700 dark:text-gray-300">{log.subject}</span>
                     </td>
                     <td className="py-4 px-4">
-                      <span className="text-gray-900 font-semibold">{log.emailsSent}</span>
+                      <span className="text-gray-900 dark:text-gray-100 font-semibold">{log.emailsSent}</span>
                     </td>
                     <td className="py-4 px-4">
                       <div className="flex items-center gap-2">
@@ -243,7 +243,7 @@ export default function EmailLogsPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="py-8 text-center text-gray-600">
+                  <td colSpan={7} className="py-8 text-center text-gray-600 dark:text-gray-400">
                     No email logs found matching your criteria.
                   </td>
                 </tr>

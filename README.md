@@ -2,8 +2,7 @@
 
 A modern, responsive web application for managing school timetables, built with **Next.js 16 (App Router)**, **TypeScript**, **Tailwind CSS**, and **shadcn/ui** components. Generated with help from **v0.dev**.
 
-This project provides role-based
- access for different users (students, teachers, principals/admins) to view, manage, and interact with school schedules, students, teachers, and organizations.
+This project provides role-based access for different users (students, teachers, principals/admins) to view, manage, and interact with school schedules, students, teachers, and organizations.
 
 ![School Timetable Preview](https://via.placeholder.com/1200x600?text=School+Timetable+UI+Preview)  
 *(Add a real screenshot here later – see instructions below)*
@@ -12,12 +11,13 @@ This project provides role-based
 
 - **Role-based authentication**
   - Role selection screen
-  - Login pages for diff erent roles (`/login/student`, `/login/teacher`, `/login/principal`, etc.)
+  - Login pages for different roles (`/login/student`, `/login/teacher`, `/login/principal`, etc.)
 - **User registration** (`/signup`)
 - **Dashboard** – personalized view after login (`/dashboard`)
 - **Timetable management** (`/timetable`)
   - View weekly/monthly schedules
-  - (Potential) Create/edit periods, assign classes/teachers/rooms
+  - Create/edit periods, assign classes/teachers/rooms
+  - Concurrent Automated Timetable Generation
 - **Student & Teacher management** (`/students`, `/teachers`)
   - List, view details, possibly CRUD operations for admins
 - **Organization/School setup** (`/organizations`)
@@ -50,31 +50,41 @@ This project provides role-based
 ```bash
 # Install pnpm globally (if not already)
 npm install -g pnpm
+```
 
+### Installation
 
-Installation
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/anujsavita929-alt/v0-school-timetable-ui.git
+   cd v0-school-timetable-ui
+   ```
 
-Clone the repository
+2. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
 
-Bashgit clone https://github.com/anujsavita929-alt/v0-school-timetable-ui.git
-cd v0-school-timetable-ui
+3. **Run development server**
+   ```bash
+   pnpm dev
+   ```
+   → Open `http://localhost:3000`
+   You should see the role selection screen first.
 
-Install dependencies
+## Available Scripts
 
-Bashpnpm install
-
-Run development server
-
-Bashpnpm dev
-→ Open http://localhost:3000
-You should see the role selection screen first.
-Available Scripts
-Bashpnpm dev     # Start dev server (localhost:3000)
+```bash
+pnpm dev     # Start dev server (localhost:3000)
 pnpm build   # Build for production
 pnpm start   # Run production build
 pnpm lint    # Run ESLint (if configured)
-Project Structure
-textapp/
+```
+
+## Project Structure
+
+```text
+app/
 ├── dashboard/           # Main dashboard after login
 ├── login/[role]/        # Dynamic login pages per role
 ├── organizations/       # School/organization management
@@ -83,12 +93,13 @@ textapp/
 ├── students/            # Student list & management
 ├── teachers/            # Teacher list & management
 ├── timetable/           # Core timetable view & editor
+├── api/                 # API Routes (including timetable generation)
 ├── globals.css
 ├── layout.tsx           # Root layout
 └── page.tsx             # Landing / home page
 components/              # shadcn/ui + custom components
 hooks/                   # Custom React hooks
-lib/                     # Utilities, cn helper, etc.
+lib/                     # Utilities, cn helper, prisma client
 public/                  # Static assets
 styles/                  # Additional global styles (if any)
-
+```

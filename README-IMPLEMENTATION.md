@@ -2,19 +2,19 @@
 
 ## Overview
 
-Successfully implemented a complete automated timetable generation system that connects the frontend UI with the Python genetic algorithm. The system includes authentication, role-based access, safety checks, and conflict protection.
+Successfully implemented a complete automated timetable generation system that connects the frontend UI with a powerful TypeScript-based scheduling algorithm. The system includes full support for concurrent timetable generation across multiple, distinct classes, along with authentication, role-based access, safety checks, and conflict protection.
 
 ## ✅ Completed Features
 
 ### 1. Backend API Route (`/app/api/generate-timetable/route.ts`)
+- **Native Implementation**: Fully native TypeScript scheduling heuristic (no Python or external binaries required)
+- **Concurrent Generation**: Supports simultaneous generation workflows for multiple specific class groups
 - **Authentication**: User session validation with NextAuth
 - **Role-based Access**: Only principals can generate timetables
-- **Request Validation**: Comprehensive input validation with TypeScript interfaces
 - **Safety Checks**: Validates existence of teachers, classes, and subjects before generation
-- **Python Integration**: Executes genetic algorithm using Node.js child_process.spawn
-- **Conflict Protection**: Validates teacher and room double-booking conflicts
-- **Database Integration**: Saves generated timetables to Prisma database
-- **Error Handling**: Detailed error responses with proper HTTP status codes
+- **Conflict Protection**: Semi-random assignment approach avoiding local traps while validating teacher, room, and lab capacity constraints
+- **Database Integration**: Saves generated timetables directly to Prisma database with automatic resource upsertion (ClassGroups, Teachers, Subjects)
+- **Error Handling**: Detailed error responses and graceful failovers with multiple retry attempts
 
 ### 2. Frontend Generate Button (`/app/timetable/page.tsx`)
 - **Role-based Rendering**: Button only visible to principals
@@ -24,12 +24,13 @@ Successfully implemented a complete automated timetable generation system that c
 
 ### 3. Generation Modal (`/components/generate-timetable-modal.tsx`)
 - **Form Validation**: react-hook-form + zod schema validation
+- **Concurrent Execution**: UI supports independent configuration for different class groups concurrently
 - **Multi-select Classes**: Checkbox interface for class selection
 - **Date Picker**: Week start date selection
 - **Constraints Configuration**:
   - Max periods per teacher (1-10)
   - Avoid teacher conflicts (checkbox)
-  - Respect room availability (checkbox)
+  - Respect room/lab availability (checkbox)
   - Priority modes: Balanced, Minimize Gaps, Core Subjects First
 - **System Status Display**: Real-time validation of system requirements
 - **Loading States**: Spinner during generation process
@@ -47,17 +48,26 @@ Successfully implemented a complete automated timetable generation system that c
 ## 🔧 Technical Implementation
 
 ### API Request Structure
+The API accommodates both modern structured payloads and legacy integrations.
 ```typescript
-interface GenerateRequest {
-  classIds: string[];
-  weekStart: string;
-  constraints: {
-    maxPeriodsPerTeacher: number;
-    avoidTeacherConflicts: boolean;
-    respectRoomAvailability: boolean;
-    priority: "balanced" | "minimize_gaps" | "core_subjects";
-  };
-}
+type GeneratePayload = {
+  classes?: ClassConfig[];        // Modern concurrent configuration
+  school?: LegacySchoolPayload;   // Legacy payload support
+  week?: string;
+};
+
+// Modern nested structure
+type ClassConfig = {
+  id: string;
+  number: string;
+  sections: SectionConfig[];
+};
+
+type SectionConfig = {
+  id: string;
+  name: string;
+  subjects: InputSubject[];       // Includes maxPeriods, priority, isLab
+};
 ```
 
 ### Safety Checks
@@ -65,24 +75,24 @@ interface GenerateRequest {
 - Prevents generation when system is not properly configured
 - Real-time status feedback in the modal
 
-### Conflict Protection
-- Teacher double-booking detection
-- Room double-booking detection
-- Validation before saving to database
+### Conflict Protection & Distribution
+- Robust native TypeScript heuristic approach for distribution
+- Lab limitations (Computer Labs, Science Labs) explicitly managed
+- Random-shuffle variation implementation to overcome deterministic scheduling deadlocks
 
 ### Database Schema Compatibility
-- Existing Prisma schema supports all required relationships
-- TimetableEntry model includes all necessary fields
-- Proper foreign key relationships maintained
+- Zero-configuration data inserts using `upsert` mechanism for missing properties
+- TimetableEntry model binds cleanly to existing period slots and foreign keys
+- Complete support for NextAuth Prisma adapters
 
 ## 🎯 User Workflow
 
 1. **Principal Access**: Only users with 'principal' role can see the Generate button
 2. **System Validation**: Modal shows system readiness status
-3. **Configuration**: Select classes, constraints, and generation parameters
-4. **Generation**: Python algorithm runs with loading indicator
+3. **Configuration**: Select distinct classes for concurrent batching, constraints, and generation parameters
+4. **Generation**: Native Node.js algorithm runs instantly
 5. **Success**: Automatic timetable refresh with success notification
-6. **Error Handling**: Clear error messages for various failure scenarios
+6. **Error Handling**: Clear error messages for capacity failure scenarios (e.g., Not enough lab slots)
 
 ## 🔒 Security Features
 
@@ -102,8 +112,8 @@ npm install next-auth @next-auth/prisma-adapter
 ```
 
 ### Database Setup
-- Configure PostgreSQL connection in Prisma
-- Run migrations: `npx prisma migrate dev`
+- Configure PostgreSQL connection in Prisma (`.env`)
+- Run migrations: `npx prisma migrate deploy`
 - Seed initial data (teachers, classes, subjects)
 
 ### Authentication Configuration
@@ -111,20 +121,14 @@ npm install next-auth @next-auth/prisma-adapter
 - Configure user roles in database
 - Update mock session handling
 
-### Python Environment
-- Ensure Python 3.x is installed on server
-- Install required Python packages in generating algo/
-- Test Python script execution permissions
-
 ## 🧪 Testing
 
 The system includes comprehensive error handling and validation:
 
-- **Missing Data**: Clear warnings when teachers/classes/subjects are missing
-- **Conflict Detection**: Validation of teacher and room conflicts
+- **Missing Data**: Clear warnings when subjects, teachers or classes are missing
+- **Capacity Detection**: Limits processing when requested allocations exceed physics logic (e.g. 50 periods in a 40 period week)
 - **Form Validation**: Client-side and server-side validation
 - **Network Errors**: Graceful handling of API failures
-- **Python Errors**: Proper error capture from Python script execution
 
 ## 🎨 UI/UX Features
 
@@ -137,17 +141,17 @@ The system includes comprehensive error handling and validation:
 
 ## 📊 Performance Considerations
 
-- **Async Operations**: Non-blocking Python execution
-- **Database Transactions**: Atomic operations for data consistency
-- **Memory Management**: Proper cleanup of resources
+- **Native Execution**: Zero network delays or inter-process overhead natively executed in Node.js
+- **Database Transactions**: Atomic operations for data consistency with `createMany` calls
+- **Memory Management**: Proper cleanup of native Maps and Sets per run
 - **Error Boundaries**: Prevents cascade failures
 
 ## 🔄 Integration Points
 
 The system seamlessly integrates with:
 - **Existing Timetable Grid**: No changes needed to display component
-- **Prisma Database**: Uses existing schema and models
-- **Python Algorithm**: Direct integration with genetic algorithm
+- **Prisma Database**: Uses existing schema and models natively without raw SQL
+- **Concurrent Engine**: Support independent class routing workflows directly
 - **UI Components**: Leverages existing shadcn/ui library
 
 ---

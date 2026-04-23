@@ -2,7 +2,7 @@ generator client {
   provider = "prisma-client-js"
 }
 datasource db {
-  provider = "sqlite"
+  provider = "libsql"
 }
 // ──────────────────────────────────────────────────────────────
 // Core Models
@@ -121,4 +121,39 @@ model Absence {
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model SchoolConfig {
+  id                  String   @id @default(uuid())
+  schoolName          String
+  totalPeriodsPerDay  Int      @default(8)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  bellTimes           BellTime[]
+  labs                Lab[]
+}
+
+model BellTime {
+  id             String   @id @default(uuid())
+  periodNumber   Int
+  label          String
+  startTime      String   // e.g. "08:00"
+  endTime        String   // e.g. "08:45"
+  isBreak        Boolean  @default(false)
+  breakLabel     String?  // e.g. "Lunch"
+  schoolConfigId String
+  schoolConfig   SchoolConfig @relation(fields: [schoolConfigId], references: [id], onDelete: Cascade)
+
+  @@unique([schoolConfigId, periodNumber])
+}
+
+model Lab {
+  id             String   @id @default(uuid())
+  name           String
+  capacity       Int?
+  labType        String?  // e.g. "Science", "Computer"
+  isAvailable    Boolean  @default(true)
+  schoolConfigId String
+  schoolConfig   SchoolConfig @relation(fields: [schoolConfigId], references: [id], onDelete: Cascade)
 }

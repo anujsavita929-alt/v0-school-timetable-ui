@@ -66,7 +66,7 @@ export function TimetableGrid({
           gridTemplateColumns: '150px repeat(5, 1fr)',
         }}>
           {/* Header - Time slot column */}
-          <div className="font-semibold text-gray-900 text-center py-4 bg-gray-50 rounded-tl-lg">
+          <div className="font-semibold text-gray-900 dark:text-gray-100 text-center py-4 bg-gray-50 dark:bg-[#1a1a1a] rounded-tl-lg">
             Time
           </div>
 
@@ -74,7 +74,7 @@ export function TimetableGrid({
           {DAYS.map((day) => (
             <div
               key={day}
-              className="font-semibold text-gray-900 text-center py-4 bg-gray-50"
+              className="font-semibold text-gray-900 dark:text-gray-100 text-center py-4 bg-gray-50 dark:bg-[#1a1a1a]"
             >
               {day}
             </div>
@@ -85,7 +85,7 @@ export function TimetableGrid({
             <div key={time} className="contents">
               {/* Time label */}
               <div
-                className={`font-semibold text-gray-700 text-center py-4 px-2 bg-gray-50 ${
+                className={`font-semibold text-gray-700 dark:text-gray-300 text-center py-4 px-2 bg-gray-50 dark:bg-[#1a1a1a] ${
                   timeIdx === TIME_SLOTS.length - 1 ? 'rounded-bl-lg' : ''
                 }`}
               >
@@ -100,7 +100,7 @@ export function TimetableGrid({
                 return (
                   <div
                     key={`${day}-${time}`}
-                    className="p-3 border border-gray-200 hover:shadow-md transition-shadow cursor-pointer min-h-[120px] flex flex-col justify-center"
+                    className="p-3 border border-gray-200 dark:border-[#222] hover:shadow-md transition-shadow cursor-pointer min-h-[120px] flex flex-col justify-center"
                     style={{
                       backgroundColor: slot ? `${bgColor}15` : 'transparent',
                       borderLeftColor: slot ? bgColor : 'transparent',
@@ -120,10 +120,10 @@ export function TimetableGrid({
                           <p className="font-bold text-gray-900 text-sm" style={{ color: bgColor }}>
                             {slot.subject}
                           </p>
-                          <p className="text-xs text-gray-600">Room: {slot.room}</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">Room: {slot.room}</p>
                         </div>
                         {!isTeacherView && (
-                          <p className="text-xs text-gray-600">{slot.teacher}</p>
+                          <p className="text-xs text-gray-600 dark:text-gray-400">{slot.teacher}</p>
                         )}
                         <Badge
                           variant="secondary"
@@ -137,7 +137,7 @@ export function TimetableGrid({
                         </Badge>
                       </div>
                     ) : (
-                      <p className="text-center text-gray-400 text-sm italic">
+                      <p className="text-center text-gray-400 dark:text-gray-600 text-sm italic">
                         Free
                       </p>
                     )}

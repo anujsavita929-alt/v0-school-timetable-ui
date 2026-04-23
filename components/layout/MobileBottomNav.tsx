@@ -35,7 +35,7 @@ export function MobileBottomNav({ role = 'student' }: MobileBottomNavProps) {
   };
 
   return (
-    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-30">
+    <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-white dark:bg-[#111111] border-t border-gray-200 dark:border-[#222] z-30">
       <div className="flex items-center justify-around">
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -47,7 +47,7 @@ export function MobileBottomNav({ role = 'student' }: MobileBottomNavProps) {
               className={`flex-1 flex flex-col items-center justify-center py-3 px-2 text-xs font-medium transition-colors ${
                 active
                   ? 'text-[#E74C3C] border-t-2 border-[#E74C3C] -mt-0.5'
-                  : 'text-gray-600 hover:text-gray-900'
+                  : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100'
               }`}
             >
               <Icon className="w-6 h-6 mb-1" />

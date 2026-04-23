@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
-import { Crown, GraduationCap, BookOpen, Sun, Moon, Sparkles, Clock, ShieldCheck } from 'lucide-react';
+import { Crown, GraduationCap, BookOpen, Sun, Moon, Sparkles, Clock, ShieldCheck, ArrowRight } from 'lucide-react';
+import { useTransition } from '@/components/transition-provider';
 
 const roles = [
   {
@@ -55,6 +56,7 @@ const roles = [
 export default function RoleSelectionPage() {
   const [dark, setDark] = useState(false);
   const [hovered, setHovered] = useState<string | null>(null);
+  const { triggerTransition } = useTransition();
 
   useEffect(() => {
     const saved = localStorage.getItem('theme');
@@ -170,14 +172,14 @@ export default function RoleSelectionPage() {
                   ))}
                 </ul>
 
-                <Link href={role.href} className="block w-full">
                   <button
-                    className="w-full py-2.5 rounded-xl text-sm font-semibold text-white transition-all duration-200 hover:opacity-90 hover:shadow-lg active:scale-[0.98]"
+                    onClick={(e) => triggerTransition(role.href, e)}
+                    className="w-full py-3.5 rounded-xl text-sm font-bold text-white transition-all duration-300 hover:opacity-90 hover:shadow-xl active:scale-[0.96] flex items-center justify-center gap-2 group/btn"
                     style={role.btnStyle}
                   >
                     Continue as {role.title}
+                    <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
                   </button>
-                </Link>
               </div>
             </div>
           );

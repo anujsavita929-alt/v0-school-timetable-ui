@@ -56,17 +56,17 @@ export default function ClassesAnalytics() {
     <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">Campus Status</h1>
-          <p className="text-slate-500">Live monitoring of room occupancy and ongoing classes.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900 dark:text-gray-100">Campus Status</h1>
+          <p className="text-slate-500 dark:text-gray-400">Live monitoring of room occupancy and ongoing classes.</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <div className="w-3 h-3 bg-emerald-500 rounded-full" />
-            <span className="text-sm font-medium text-slate-600">Occupied ({occupiedCount})</span>
+            <span className="text-sm font-medium text-slate-600 dark:text-gray-300">Occupied ({occupiedCount})</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 bg-slate-100 border border-slate-200 rounded-full" />
-            <span className="text-sm font-medium text-slate-600">Available ({roomsData.length - occupiedCount})</span>
+            <div className="w-3 h-3 bg-slate-100 dark:bg-[#1a1a1a] border border-slate-200 dark:border-[#333] rounded-full" />
+            <span className="text-sm font-medium text-slate-600 dark:text-gray-300">Available ({roomsData.length - occupiedCount})</span>
           </div>
         </div>
       </div>
@@ -74,7 +74,7 @@ export default function ClassesAnalytics() {
       <div className="grid gap-6 lg:grid-cols-4">
         {/* Statistics and Filters */}
         <div className="lg:col-span-1 space-y-6">
-          <Card className="border-slate-200">
+          <Card className="border-slate-200 dark:border-[#222] dark:bg-[#111111]">
             <CardHeader>
               <CardTitle className="text-sm font-bold flex items-center gap-2">
                 <SchoolIcon className="w-4 h-4 text-red-500" />
@@ -82,22 +82,22 @@ export default function ClassesAnalytics() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Building A</p>
+              <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#1a1a1a] border border-slate-100 dark:border-[#222]">
+                <p className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-widest mb-1">Building A</p>
                 <div className="flex justify-between items-end">
-                  <h3 className="text-lg font-bold text-slate-900">12 Rooms</h3>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-gray-100">12 Rooms</h3>
                   <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200">85% Full</Badge>
                 </div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Building B (Labs)</p>
+              <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#1a1a1a] border border-slate-100 dark:border-[#222]">
+                <p className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-widest mb-1">Building B (Labs)</p>
                 <div className="flex justify-between items-end">
-                  <h3 className="text-lg font-bold text-slate-900">8 Rooms</h3>
+                  <h3 className="text-lg font-bold text-slate-900 dark:text-gray-100">8 Rooms</h3>
                   <Badge className="bg-orange-100 text-orange-700 border-orange-200">20% Full</Badge>
                 </div>
               </div>
-              <div className="p-3 rounded-lg bg-slate-50 border border-slate-100">
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Library / Hall</p>
+              <div className="p-3 rounded-lg bg-slate-50 dark:bg-[#1a1a1a] border border-slate-100 dark:border-[#222]">
+                <p className="text-xs font-bold text-slate-400 dark:text-gray-500 uppercase tracking-widest mb-1">Library / Hall</p>
                 <div className="flex justify-between items-end">
                   <h3 className="text-lg font-bold text-slate-900">4 Rooms</h3>
                   <Badge variant="outline" className="text-slate-500">Unused</Badge>
@@ -106,7 +106,7 @@ export default function ClassesAnalytics() {
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200 bg-slate-900 text-white overflow-hidden group">
+          <Card className="border-slate-200 dark:border-[#222] bg-slate-900 dark:bg-[#0e0e0e] text-white overflow-hidden group">
             <CardHeader>
               <CardTitle className="text-sm font-bold text-red-200">Next Shift Starts In</CardTitle>
             </CardHeader>
@@ -129,12 +129,12 @@ export default function ClassesAnalytics() {
                       className={`p-4 rounded-2xl border transition-all cursor-pointer h-32 relative group shadow-sm flex flex-col justify-between ${
                         room.occupied 
                           ? 'bg-emerald-600 border-emerald-700 text-white animate-in zoom-in duration-300 shadow-emerald-200 shadow-lg' 
-                          : 'bg-white border-slate-200 hover:border-slate-300'
+                          : 'bg-white dark:bg-[#111111] border-slate-200 dark:border-[#222] hover:border-slate-300 dark:hover:border-[#333]'
                       }`}
                     >
                       <div className="flex justify-between items-start">
                         <div className={`p-1.5 rounded-lg ${room.occupied ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}>
-                          {room.type === 'lab' ? <FlaskConical className="w-4 h-4" /> : <Monitor className="w-4 h-4" />}
+                          {room.type === 'lab' ? <FlaskConical className="w-4 h-4" /> : <Monitor className="w-4 h-4 dark:text-gray-400" />}
                         </div>
                         <Badge variant="outline" className={`text-[10px] font-bold ${room.occupied ? 'bg-emerald-500/20 border-emerald-400 text-white border-none' : 'bg-slate-50'}`}>
                           {room.name}
@@ -151,7 +151,7 @@ export default function ClassesAnalytics() {
                           </p>
                         </div>
                       ) : (
-                        <p className="text-xs font-bold text-slate-300 tracking-wider">AVAILABLE</p>
+                        <p className="text-xs font-bold text-slate-300 dark:text-gray-600 tracking-wider">AVAILABLE</p>
                       )}
 
                       {room.occupied && (

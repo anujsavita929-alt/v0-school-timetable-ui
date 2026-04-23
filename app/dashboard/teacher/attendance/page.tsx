@@ -114,8 +114,8 @@ export default function AttendancePage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-black text-slate-900">Mark Attendance</h1>
-            <p className="text-sm text-slate-500">{today}</p>
+            <h1 className="text-3xl font-black text-slate-900 dark:text-gray-100">Mark Attendance</h1>
+            <p className="text-sm text-slate-500 dark:text-gray-400">{today}</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
@@ -128,7 +128,7 @@ export default function AttendancePage() {
       </div>
 
       {/* Class Info Banner */}
-      <Card className="border-none bg-slate-900 text-white shadow-xl">
+      <Card className="border-none bg-slate-900 dark:bg-[#0e0e0e] dark:border dark:border-[#222] text-white shadow-xl">
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -160,17 +160,17 @@ export default function AttendancePage() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <Input 
             placeholder="Search by name or roll number..." 
-            className="pl-10 h-11"
+            className="pl-10 h-11 dark:bg-[#1a1a1a] dark:border-[#333] dark:text-gray-100"
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
         </div>
         <div className="flex gap-3">
-          <Button variant="outline" className="gap-2 border-emerald-200 text-emerald-700 hover:bg-emerald-50 font-bold" onClick={markAllPresent}>
+          <Button variant="outline" className="gap-2 border-emerald-200 dark:border-emerald-500/20 text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 font-bold" onClick={markAllPresent}>
             <Check className="w-4 h-4" />
             Mark All Present
           </Button>
-          <Button variant="outline" className="gap-2 border-red-200 text-red-700 hover:bg-red-50 font-bold" onClick={markAllAbsent}>
+          <Button variant="outline" className="gap-2 border-red-200 dark:border-red-500/20 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 font-bold" onClick={markAllAbsent}>
             <UserX className="w-4 h-4" />
             Mark All Absent
           </Button>
@@ -185,8 +185,8 @@ export default function AttendancePage() {
             onClick={() => toggleStudent(student.id)}
             className={`flex items-center justify-between p-4 rounded-xl border-2 cursor-pointer transition-all hover:scale-[1.01] ${
               attendance[student.id]
-                ? "border-emerald-200 bg-emerald-50/50 hover:bg-emerald-50 hover:shadow-md hover:shadow-emerald-100"
-                : "border-red-200 bg-red-50/50 hover:bg-red-50 hover:shadow-md hover:shadow-red-100"
+                ? "border-emerald-200 dark:border-emerald-500/20 bg-emerald-50/50 dark:bg-emerald-500/5 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:shadow-md hover:shadow-emerald-100 dark:hover:shadow-none"
+                : "border-red-200 dark:border-red-500/20 bg-red-50/50 dark:bg-red-500/5 hover:bg-red-50 dark:hover:bg-red-500/10 hover:shadow-md hover:shadow-red-100 dark:hover:shadow-none"
             }`}
           >
             <div className="flex items-center gap-3">
@@ -195,7 +195,7 @@ export default function AttendancePage() {
               }`}>
                 {student.rollNo}
               </div>
-              <span className="font-bold text-slate-900">{student.name}</span>
+              <span className="font-bold text-slate-900 dark:text-gray-100">{student.name}</span>
             </div>
             <div className="flex items-center gap-2">
               <Badge className={`text-[10px] font-black px-3 ${
@@ -216,9 +216,9 @@ export default function AttendancePage() {
       </div>
 
       {/* Bottom Save Bar */}
-      <div className="sticky bottom-0 bg-white border-t p-4 -mx-6 px-6 flex items-center justify-between shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+      <div className="sticky bottom-0 bg-white dark:bg-[#111111] border-t dark:border-[#222] p-4 -mx-6 px-6 flex items-center justify-between shadow-[0_-4px_12px_rgba(0,0,0,0.05)] dark:shadow-[0_-4px_12px_rgba(0,0,0,0.3)]">
         <div className="flex gap-6 text-sm">
-          <span className="font-bold text-slate-900">Total: {classStudents.length}</span>
+          <span className="font-bold text-slate-900 dark:text-gray-100">Total: {classStudents.length}</span>
           <span className="font-bold text-emerald-600">Present: {presentCount}</span>
           <span className="font-bold text-red-600">Absent: {absentCount}</span>
           <span className="font-bold text-amber-600">Rate: {percentage}%</span>

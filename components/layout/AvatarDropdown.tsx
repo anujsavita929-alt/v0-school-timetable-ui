@@ -47,11 +47,11 @@ export function AvatarDropdown({
           ></div>
 
           {/* Menu */}
-          <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-lg border border-gray-200 z-40 overflow-hidden">
+          <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-[#111111] rounded-2xl shadow-lg border border-gray-200 dark:border-[#333] z-40 overflow-hidden">
             {/* User Info */}
-            <div className="p-4 border-b border-gray-200 bg-gray-50">
-              <p className="font-semibold text-gray-900">{userName}</p>
-              <p className="text-sm text-gray-600">{userRole}</p>
+            <div className="p-4 border-b border-gray-200 dark:border-[#222] bg-gray-50 dark:bg-[#1a1a1a]">
+              <p className="font-semibold text-gray-900 dark:text-gray-100">{userName}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-400">{userRole}</p>
             </div>
 
             {/* Menu Items */}
@@ -68,7 +68,7 @@ export function AvatarDropdown({
                           router.push('/role-selection');
                         }
                       }}
-                      className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-50 transition-colors text-left"
+                      className="w-full px-4 py-2 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-[#1a1a1a] transition-colors text-left dark:text-gray-300"
                       style={item.color ? { color: item.color } : undefined}
                     >
                       <Icon className="w-4 h-4" />
